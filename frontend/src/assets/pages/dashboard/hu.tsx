@@ -1,5 +1,3 @@
-//DashboardRouter.tsx
-
 import AdminDashboard from "./AdminDashboard";
 import UserDashboard from "./UserDashboard";
 import TechnicianDashboard from "./TechnicianDashboard";
