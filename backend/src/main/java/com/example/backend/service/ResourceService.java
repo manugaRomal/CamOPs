@@ -45,4 +45,30 @@ public class ResourceService {
     public void deleteResource(Long id) {
         resourceRepository.deleteById(id);
     }
+
+    public List<Resource> searchResources(String type, String location, Integer capacity, String status) {
+        if (type != null && location != null && status != null) {
+            return resourceRepository.findByTypeIgnoreCaseAndLocationIgnoreCaseAndStatusIgnoreCase(
+                    type, location, status
+            );
+        }
+
+        if (type != null) {
+            return resourceRepository.findByTypeIgnoreCase(type);
+        }
+
+        if (location != null) {
+            return resourceRepository.findByLocationIgnoreCase(location);
+        }
+
+        if (capacity != null) {
+            return resourceRepository.findByCapacity(capacity);
+        }
+
+        if (status != null) {
+            return resourceRepository.findByStatusIgnoreCase(status);
+        }
+
+        return resourceRepository.findAll();
+    }
 }
