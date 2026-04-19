@@ -1,24 +1,52 @@
 //Sidebar.tsx
 
+import { useNavigate } from "react-router-dom";
+
 type SidebarProps = {
   role: string;
 };
 
 const Sidebar = ({ role }: SidebarProps) => {
-  const menuByRole: Record<string, string[]> = {
-    ADMIN: ["Dashboard", "Resources", "Bookings", "Tickets", "Users", "Notifications", "Analytics"],
-    USER: ["Dashboard", "My Bookings", "My Tickets", "Notifications"],
-    TECHNICIAN: ["Dashboard", "Assigned Tickets", "Work Updates", "Notifications"],
+  const navigate = useNavigate();
+
+  const menuByRole: Record<string, { label: string; path: string }[]> = {
+    ADMIN: [
+      { label: "Dashboard", path: "/" },
+      { label: "Resources", path: "/resources" },
+      { label: "Bookings", path: "/bookings" },
+      { label: "Tickets", path: "/tickets" },
+      { label: "Users", path: "/users" },
+      { label: "Notifications", path: "/notifications" },
+      { label: "Analytics", path: "/analytics" },
+    ],
+    USER: [
+      { label: "Dashboard", path: "/" },
+      { label: "My Bookings", path: "/bookings" },
+      { label: "My Tickets", path: "/tickets" },
+      { label: "Notifications", path: "/notifications" },
+    ],
+    TECHNICIAN: [
+      { label: "Dashboard", path: "/" },
+      { label: "Assigned Tickets", path: "/tickets" },
+      { label: "Work Updates", path: "/work-updates" },
+      { label: "Notifications", path: "/notifications" },
+    ],
   };
 
-  const menuItems = menuByRole[role] || ["Dashboard"];
+  const menuItems = menuByRole[role] ?? [{ label: "Dashboard", path: "/" }];
 
   return (
     <aside className="sidebar">
       <div className="logo">CamOPs</div>
       <ul>
         {menuItems.map((item) => (
-          <li key={item}>{item}</li>
+          <li
+            key={item.label}
+            onClick={() => navigate(item.path)}
+            style={{ cursor: "pointer" }}
+          >
+            {item.label}
+          </li>
         ))}
       </ul>
     </aside>
