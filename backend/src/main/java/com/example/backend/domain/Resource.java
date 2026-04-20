@@ -2,89 +2,152 @@ package com.example.backend.domain;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 @Entity
-@Table(name = "resources")
+@Table(name = "Resources", schema = "dbo")
 public class Resource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "resource_id")
+    private Long resourceId;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "resource_code", nullable = false, unique = true)
+    private String resourceCode;
 
-    private String type;
-    private String location;
-    private Integer capacity;
+    @Column(name = "resource_name", nullable = false)
+    private String resourceName;
+
+    @Column(name = "resource_type", nullable = false)
+    private String resourceType;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "status", nullable = false)
     private String status;
-    private String availabilityWindow;
 
-    public Resource() {
+    @Column(name = "location")
+    private String location;
+
+    @Column(name = "capacity")
+    private Integer capacity;
+
+    @Column(name = "resource_image")
+    private String resourceImage;
+
+    @Column(name = "availability_start_time")
+    private LocalTime availabilityStartTime;
+
+    @Column(name = "availability_end_time")
+    private LocalTime availabilityEndTime;
+
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
+
+    // Constructor
+    public Resource() {}
+
+    // Getters & Setters
+
+    public Long getResourceId() {
+        return resourceId;
     }
 
-    public Resource(Long id, String name, String type, String location, Integer capacity, String status, String availabilityWindow) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.location = location;
-        this.capacity = capacity;
-        this.status = status;
-        this.availabilityWindow = availabilityWindow;
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
     }
 
-    public Long getId() {
-        return id;
+    public String getResourceCode() {
+        return resourceCode;
     }
 
-    public String getName() {
-        return name;
+    public void setResourceCode(String resourceCode) {
+        this.resourceCode = resourceCode;
     }
 
-    public String getType() {
-        return type;
+    public String getResourceName() {
+        return resourceName;
     }
 
-    public String getLocation() {
-        return location;
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
     }
 
-    public Integer getCapacity() {
-        return capacity;
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public String getAvailabilityWindow() {
-        return availabilityWindow;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public String getLocation() {
+        return location;
     }
 
     public void setLocation(String location) {
         this.location = location;
     }
 
+    public Integer getCapacity() {
+        return capacity;
+    }
+
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public String getResourceImage() {
+        return resourceImage;
     }
 
-    public void setAvailabilityWindow(String availabilityWindow) {
-        this.availabilityWindow = availabilityWindow;
+    public void setResourceImage(String resourceImage) {
+        this.resourceImage = resourceImage;
+    }
+
+    public LocalTime getAvailabilityStartTime() {
+        return availabilityStartTime;
+    }
+
+    public void setAvailabilityStartTime(LocalTime availabilityStartTime) {
+        this.availabilityStartTime = availabilityStartTime;
+    }
+
+    public LocalTime getAvailabilityEndTime() {
+        return availabilityEndTime;
+    }
+
+    public void setAvailabilityEndTime(LocalTime availabilityEndTime) {
+        this.availabilityEndTime = availabilityEndTime;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

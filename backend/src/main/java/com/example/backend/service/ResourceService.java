@@ -31,12 +31,16 @@ public class ResourceService {
     public Resource updateResource(Long id, Resource updatedResource) {
         return resourceRepository.findById(id)
                 .map(resource -> {
-                    resource.setName(updatedResource.getName());
-                    resource.setType(updatedResource.getType());
+                    resource.setResourceCode(updatedResource.getResourceCode());
+                    resource.setResourceName(updatedResource.getResourceName());
+                    resource.setResourceType(updatedResource.getResourceType());
+                    resource.setDescription(updatedResource.getDescription());
+                    resource.setStatus(updatedResource.getStatus());
                     resource.setLocation(updatedResource.getLocation());
                     resource.setCapacity(updatedResource.getCapacity());
-                    resource.setStatus(updatedResource.getStatus());
-                    resource.setAvailabilityWindow(updatedResource.getAvailabilityWindow());
+                    resource.setResourceImage(updatedResource.getResourceImage());
+                    resource.setAvailabilityStartTime(updatedResource.getAvailabilityStartTime());
+                    resource.setAvailabilityEndTime(updatedResource.getAvailabilityEndTime());
                     return resourceRepository.save(resource);
                 })
                 .orElseThrow(() -> new RuntimeException("Resource not found with id: " + id));
@@ -46,18 +50,12 @@ public class ResourceService {
         resourceRepository.deleteById(id);
     }
 
-    public List<Resource> searchResources(String type, String location, Integer capacity, String status) {
-        if (type != null && location != null && status != null) {
-            return resourceRepository.findByTypeIgnoreCaseAndLocationIgnoreCaseAndStatusIgnoreCase(
-                    type, location, status
-            );
+    public List<Resource> searchResources(String resourceType, String location, Integer capacity, String status) {
+        if (resourceType != null && !resourceType.isBlank()) {
+            return resourceRepository.findByResourceTypeIgnoreCase(resourceType);
         }
 
-        if (type != null) {
-            return resourceRepository.findByTypeIgnoreCase(type);
-        }
-
-        if (location != null) {
+        if (location != null && !location.isBlank()) {
             return resourceRepository.findByLocationIgnoreCase(location);
         }
 
@@ -65,7 +63,7 @@ public class ResourceService {
             return resourceRepository.findByCapacity(capacity);
         }
 
-        if (status != null) {
+        if (status != null && !status.isBlank()) {
             return resourceRepository.findByStatusIgnoreCase(status);
         }
 

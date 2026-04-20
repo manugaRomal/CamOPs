@@ -19,12 +19,12 @@ public class ResourceController {
 
     @GetMapping
     public List<Resource> getResources(
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) String location,
-            @RequestParam(required = false) Integer capacity,
-            @RequestParam(required = false) String status
+        @RequestParam(required = false) String resourceType,
+        @RequestParam(required = false) String location,
+        @RequestParam(required = false) Integer capacity,
+        @RequestParam(required = false) String status
     ) {
-        return resourceService.searchResources(type, location, capacity, status);
+        return resourceService.searchResources(resourceType, location, capacity, status);
     }
 
     @GetMapping("/{id}")
