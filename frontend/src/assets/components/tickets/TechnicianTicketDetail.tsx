@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTickets } from "../../context/TicketContext";
-import type { TicketComment } from "../../types/ticket";
+import { TicketStatus } from "../../types/ticket";
 
 const priorityColors: Record<string, string> = {
   LOW: "#27ae60",
@@ -18,21 +18,17 @@ const statusColors: Record<string, string> = {
   REJECTED: "#e74c3c",
 };
 
-interface TicketDetailProps {
+interface TechnicianTicketDetailProps {
   ticketId: string;
 }
 
-const TicketDetail = ({ ticketId }: TicketDetailProps) => {
+const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
   const navigate = useNavigate();
-  const { tickets } = useTickets();
+  const { tickets, updateTicketStatus, assignTicket } = useTickets();
   const ticket = tickets.find((t) => t.id === ticketId);
 
-  const [comments, setComments] = useState<TicketComment[]>(
-    ticket?.comments ?? []
-  );
-  const [newComment, setNewComment] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
+  const [resolutionNotes, setResolutionNotes] = useState(ticket?.resolutionNotes ?? "");
+  const [showResolveForm, setShowResolveForm] = useState(false);
 
   if (!ticket) {
     return (
@@ -40,7 +36,7 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
         Ticket not found.{" "}
         <span
           style={{ color: "#1a3a6b", cursor: "pointer" }}
-          onClick={() => navigate("/tickets")}
+          onClick={() => navigate("/technician/tickets")}
         >
           Go back
         </span>
@@ -48,41 +44,25 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
     );
   }
 
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-    const comment: TicketComment = {
-      id: Date.now().toString(),
-      ticketId: ticket.id,
-      userId: "user1",
-      userName: "Nethmi Silva",
-      commentText: newComment,
-      isEdited: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setComments([...comments, comment]);
-    setNewComment("");
+  const handleAssign = () => {
+    assignTicket(ticket.id, "tech1", "Kamal Perera");
+    updateTicketStatus(ticket.id, TicketStatus.IN_PROGRESS);
+    alert("Ticket assigned and marked as IN PROGRESS!");
   };
 
-  const handleDelete = (id: string) => {
-    setComments(comments.filter((c) => c.id !== id));
+  const handleResolve = () => {
+    if (!resolutionNotes.trim()) {
+      alert("Please add resolution notes before resolving.");
+      return;
+    }
+    updateTicketStatus(ticket.id, TicketStatus.RESOLVED, resolutionNotes);
+    setShowResolveForm(false);
+    alert("Ticket marked as RESOLVED!");
   };
 
-  const handleEdit = (comment: TicketComment) => {
-    setEditingId(comment.id);
-    setEditText(comment.commentText);
-  };
-
-  const handleSaveEdit = (id: string) => {
-    setComments(
-      comments.map((c) =>
-        c.id === id
-          ? { ...c, commentText: editText, isEdited: true, updatedAt: new Date().toISOString() }
-          : c
-      )
-    );
-    setEditingId(null);
-    setEditText("");
+  const handleClose = () => {
+    updateTicketStatus(ticket.id, TicketStatus.CLOSED);
+    alert("Ticket CLOSED!");
   };
 
   return (
@@ -91,7 +71,7 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
 
         {/* Back Button */}
         <button
-          onClick={() => navigate("/tickets")}
+          onClick={() => navigate("/technician/tickets")}
           style={{ marginBottom: "1rem", padding: "0.5rem 1.2rem", borderRadius: "8px", border: "1px solid #ccc", background: "#fff", cursor: "pointer", fontWeight: "600" }}
         >
           ← Back to Tickets
@@ -156,75 +136,96 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
               <p style={{ margin: 0, color: "#333", fontSize: "0.9rem" }}>{ticket.resolutionNotes}</p>
             </div>
           )}
+
+          {/* Technician Action Buttons */}
+          <div style={{ marginTop: "1.5rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+
+            {/* Assign & Start */}
+            {ticket.status === TicketStatus.OPEN && (
+              <button
+                onClick={handleAssign}
+                style={{ padding: "0.6rem 1.2rem", borderRadius: "8px", border: "none", background: "#f39c12", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+              >
+                Accept & Start Progress
+              </button>
+            )}
+
+            {/* Resolve */}
+            {ticket.status === TicketStatus.IN_PROGRESS && (
+              <button
+                onClick={() => setShowResolveForm(!showResolveForm)}
+                style={{ padding: "0.6rem 1.2rem", borderRadius: "8px", border: "none", background: "#27ae60", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+              >
+                Mark as Resolved
+              </button>
+            )}
+
+            {/* Close */}
+            {ticket.status === TicketStatus.RESOLVED && (
+              <button
+                onClick={handleClose}
+                style={{ padding: "0.6rem 1.2rem", borderRadius: "8px", border: "none", background: "#95a5a6", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+              >
+                Close Ticket
+              </button>
+            )}
+
+          </div>
+
+          {/* Resolve Form */}
+          {showResolveForm && (
+            <div style={{ marginTop: "1rem" }}>
+              <label style={detailLabel}>Resolution Notes *</label>
+              <textarea
+                value={resolutionNotes}
+                onChange={(e) => setResolutionNotes(e.target.value)}
+                placeholder="Describe how the issue was resolved..."
+                rows={3}
+                style={{ width: "100%", padding: "0.7rem", borderRadius: "8px", border: "1px solid #ddd", boxSizing: "border-box", resize: "vertical", fontSize: "0.9rem" }}
+              />
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                <button
+                  onClick={handleResolve}
+                  style={{ padding: "0.6rem 1.2rem", borderRadius: "8px", border: "none", background: "#27ae60", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+                >
+                  Confirm Resolve
+                </button>
+                <button
+                  onClick={() => setShowResolveForm(false)}
+                  style={{ padding: "0.6rem 1.2rem", borderRadius: "8px", border: "1px solid #ccc", background: "#fff", cursor: "pointer", fontWeight: "600" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Comments Section */}
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
           <h3 style={{ margin: "0 0 1rem", fontSize: "1.1rem", fontWeight: "700", color: "#1a1a2e" }}>
-            Comments ({comments.length})
+            Comments ({ticket.comments.length})
           </h3>
 
-          {comments.length === 0 && (
+          {ticket.comments.length === 0 && (
             <p style={{ color: "#999", fontSize: "0.9rem" }}>No comments yet.</p>
           )}
 
-          {comments.map((comment) => (
+          {ticket.comments.map((comment) => (
             <div key={comment.id} style={{ borderBottom: "1px solid #f0f0f0", paddingBottom: "1rem", marginBottom: "1rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "700", fontSize: "0.9rem", color: "#1a1a2e" }}>
                   {comment.userName}
-                  {comment.isEdited && <span style={{ fontSize: "0.75rem", color: "#999", marginLeft: "0.5rem" }}>(edited)</span>}
                 </span>
                 <span style={{ fontSize: "0.78rem", color: "#999" }}>
                   {new Date(comment.createdAt).toLocaleString()}
                 </span>
               </div>
-
-              {editingId === comment.id ? (
-                <div style={{ marginTop: "0.5rem" }}>
-                  <textarea
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    rows={2}
-                    style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid #ddd", boxSizing: "border-box", resize: "vertical" }}
-                  />
-                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.4rem" }}>
-                    <button onClick={() => handleSaveEdit(comment.id)} style={saveBtn}>Save</button>
-                    <button onClick={() => setEditingId(null)} style={cancelBtn}>Cancel</button>
-                  </div>
-                </div>
-              ) : (
-                <p style={{ margin: "0.4rem 0 0.5rem", color: "#444", fontSize: "0.9rem" }}>
-                  {comment.commentText}
-                </p>
-              )}
-
-              {/* Only show edit/delete for own comments (userId === "user1") */}
-              {comment.userId === "user1" && editingId !== comment.id && (
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button onClick={() => handleEdit(comment)} style={editBtn}>Edit</button>
-                  <button onClick={() => handleDelete(comment.id)} style={deleteBtn}>Delete</button>
-                </div>
-              )}
+              <p style={{ margin: "0.4rem 0 0", color: "#444", fontSize: "0.9rem" }}>
+                {comment.commentText}
+              </p>
             </div>
           ))}
-
-          {/* Add Comment */}
-          <div style={{ marginTop: "1rem" }}>
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Write a comment..."
-              rows={3}
-              style={{ width: "100%", padding: "0.7rem", borderRadius: "8px", border: "1px solid #ddd", boxSizing: "border-box", resize: "vertical", fontSize: "0.9rem" }}
-            />
-            <button
-              onClick={handleAddComment}
-              style={{ marginTop: "0.5rem", padding: "0.6rem 1.4rem", borderRadius: "8px", border: "none", background: "#1a3a6b", color: "#fff", cursor: "pointer", fontWeight: "600" }}
-            >
-              Add Comment
-            </button>
-          </div>
         </div>
 
       </div>
@@ -238,21 +239,5 @@ const detailLabel: React.CSSProperties = {
 const detailValue: React.CSSProperties = {
   display: "block", fontSize: "0.9rem", color: "#333", fontWeight: "500",
 };
-const editBtn: React.CSSProperties = {
-  padding: "0.25rem 0.7rem", borderRadius: "6px", border: "1px solid #3498db",
-  background: "#fff", color: "#3498db", cursor: "pointer", fontSize: "0.8rem",
-};
-const deleteBtn: React.CSSProperties = {
-  padding: "0.25rem 0.7rem", borderRadius: "6px", border: "1px solid #e74c3c",
-  background: "#fff", color: "#e74c3c", cursor: "pointer", fontSize: "0.8rem",
-};
-const saveBtn: React.CSSProperties = {
-  padding: "0.25rem 0.7rem", borderRadius: "6px", border: "none",
-  background: "#1a3a6b", color: "#fff", cursor: "pointer", fontSize: "0.8rem",
-};
-const cancelBtn: React.CSSProperties = {
-  padding: "0.25rem 0.7rem", borderRadius: "6px", border: "1px solid #ccc",
-  background: "#fff", color: "#666", cursor: "pointer", fontSize: "0.8rem",
-};
 
-export default TicketDetail;
+export default TechnicianTicketDetail;

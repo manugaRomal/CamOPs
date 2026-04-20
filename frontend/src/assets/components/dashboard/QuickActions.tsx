@@ -16,12 +16,15 @@ const QuickActions = ({ actions }: QuickActionsProps) => {
         break;
       case "My Tickets":
         navigate("/tickets");
-        break;
+        break
       case "Book Resource":
         navigate("/bookings/create");
         break;
       case "View Notifications":
         navigate("/notifications");
+        break;
+      case "View Assigned Tickets":
+        navigate("/technician/tickets");
         break;
       default:
         break;

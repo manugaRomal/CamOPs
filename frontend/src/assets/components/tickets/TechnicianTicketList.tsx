@@ -16,7 +16,7 @@ const statusColors: Record<string, string> = {
   REJECTED: "#e74c3c",
 };
 
-const TicketList = () => {
+const TechnicianTicketList = () => {
   const navigate = useNavigate();
   const { tickets } = useTickets();
 
@@ -28,30 +28,30 @@ const TicketList = () => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
           <div>
             <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#1a1a2e", margin: 0 }}>
-              My Tickets
+              Assigned Tickets
             </h2>
             <p style={{ color: "#666", marginTop: "0.25rem", fontSize: "0.9rem" }}>
-              {tickets.length} ticket(s) found
+              {tickets.length} ticket(s) to handle
             </p>
           </div>
           <button
-            onClick={() => navigate("/tickets/create")}
-            style={{ padding: "0.6rem 1.4rem", borderRadius: "8px", border: "none", background: "#1a3a6b", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+            onClick={() => navigate("/technician")}
+            style={{ padding: "0.6rem 1.4rem", borderRadius: "8px", border: "1px solid #ccc", background: "#fff", cursor: "pointer", fontWeight: "600" }}
           >
-            + Create Ticket
+            ← Dashboard
           </button>
         </div>
 
         {/* Ticket Cards */}
         {tickets.length === 0 ? (
           <div style={{ textAlign: "center", padding: "3rem", color: "#999" }}>
-            No tickets found.
+            No tickets assigned.
           </div>
         ) : (
           tickets.map((ticket) => (
             <div
               key={ticket.id}
-              onClick={() => navigate(`/tickets/${ticket.id}`)}
+              onClick={() => navigate(`/technician/tickets/${ticket.id}`)}
               style={{
                 backgroundColor: "#fff",
                 borderRadius: "10px",
@@ -60,7 +60,6 @@ const TicketList = () => {
                 boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                 cursor: "pointer",
                 borderLeft: `4px solid ${priorityColors[ticket.priority] ?? "#ccc"}`,
-                transition: "box-shadow 0.2s",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -74,25 +73,25 @@ const TicketList = () => {
                       : ticket.description}
                   </h3>
                   <span style={{ fontSize: "0.85rem", color: "#666" }}>
-                    {ticket.resourceName ?? "No resource"} • {ticket.category.replace("_", " ")}
+                    {ticket.resourceName ?? "No resource"} • {ticket.category.replace(/_/g, " ")}
                   </span>
+                  <div style={{ marginTop: "0.4rem", fontSize: "0.82rem", color: "#888" }}>
+                    Reported by: {ticket.reportedByName}
+                  </div>
+                  <div style={{ fontSize: "0.82rem", color: "#888" }}>
+                    Assigned to: {ticket.assignedToName ?? "Unassigned"}
+                  </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
                   <span style={{
-                    padding: "0.25rem 0.7rem",
-                    borderRadius: "20px",
-                    fontSize: "0.75rem",
-                    fontWeight: "700",
+                    padding: "0.25rem 0.7rem", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "700",
                     backgroundColor: statusColors[ticket.status] + "22",
                     color: statusColors[ticket.status],
                   }}>
-                    {ticket.status.replace("_", " ")}
+                    {ticket.status.replace(/_/g, " ")}
                   </span>
                   <span style={{
-                    padding: "0.25rem 0.7rem",
-                    borderRadius: "20px",
-                    fontSize: "0.75rem",
-                    fontWeight: "700",
+                    padding: "0.25rem 0.7rem", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "700",
                     backgroundColor: priorityColors[ticket.priority] + "22",
                     color: priorityColors[ticket.priority],
                   }}>
@@ -106,17 +105,9 @@ const TicketList = () => {
             </div>
           ))
         )}
-
-        {/* Back button */}
-        <button
-          onClick={() => navigate("/")}
-          style={{ marginTop: "1rem", padding: "0.6rem 1.4rem", borderRadius: "8px", border: "1px solid #ccc", background: "#fff", cursor: "pointer", fontWeight: "600" }}
-        >
-          ← Back to Dashboard
-        </button>
       </div>
     </div>
   );
 };
 
-export default TicketList;
+export default TechnicianTicketList;

@@ -2,9 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { categoryOptions, priorityOptions, mockResources } from "../../data/ticketData";
 import type { CreateTicketRequest } from "../../types/ticket";
+import { useTickets } from "../../context/TicketContext";
+import { TicketStatus } from "../../types/ticket";
+import type { Ticket } from "../../types/ticket";
 
 const CreateTicketForm = () => {
   const navigate = useNavigate();
+  const { addTicket } = useTickets();
 
   const [form, setForm] = useState<CreateTicketRequest>({
     category: categoryOptions[0].value,
@@ -47,12 +51,31 @@ const CreateTicketForm = () => {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    console.log("Ticket submitted:", form, attachments);
-    alert("Ticket created successfully!");
-    navigate("/tickets");
+  e.preventDefault();
+  if (!validate()) return;
+
+  const newTicket: Ticket = {
+    id: Date.now().toString(),
+    ticketCode: `TKT-${Date.now().toString().slice(-3)}`,
+    resourceId: form.resourceId,
+    resourceName: mockResources.find((r) => r.id === form.resourceId)?.name,
+    reportedBy: "user1",
+    reportedByName: "Nethmi Silva",
+    category: form.category,
+    description: form.description,
+    priority: form.priority,
+    preferredContact: form.preferredContact,
+    status: TicketStatus.OPEN,
+    attachments: [],
+    comments: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
+
+  addTicket(newTicket);
+  alert("Ticket created successfully!");
+  navigate("/tickets");
+};
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f5f6fa", padding: "2rem" }}>
