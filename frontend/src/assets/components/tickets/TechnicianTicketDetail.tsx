@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTickets } from "../../context/TicketContext";
 import { TicketStatus } from "../../types/ticket";
+import SLATimer from "./SLATimer";
 
 const priorityColors: Record<string, string> = {
   LOW: "#27ae60",
@@ -142,6 +143,14 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
               <span style={detailValue}>{new Date(ticket.createdAt).toLocaleString()}</span>
             </div>
           </div>
+
+          {/* SLA Timer */}
+          <SLATimer
+            createdAt={ticket.createdAt}
+            priority={ticket.priority}
+            status={ticket.status}
+            resolvedAt={ticket.resolvedAt}
+          />
 
           {/* Attachments */}
           {ticket.attachments.length > 0 && (
