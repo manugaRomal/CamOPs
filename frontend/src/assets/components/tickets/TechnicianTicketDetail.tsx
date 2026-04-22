@@ -24,11 +24,13 @@ interface TechnicianTicketDetailProps {
 
 const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
   const navigate = useNavigate();
-  const { tickets, updateTicketStatus, assignTicket } = useTickets();
+  const { tickets, updateTicketStatus, assignTicket, rejectTicket } = useTickets();
   const ticket = tickets.find((t) => t.id === ticketId);
 
   const [resolutionNotes, setResolutionNotes] = useState(ticket?.resolutionNotes ?? "");
   const [showResolveForm, setShowResolveForm] = useState(false);
+  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   if (!ticket) {
     return (
@@ -65,6 +67,16 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
     alert("Ticket CLOSED!");
   };
 
+  const handleReject = () => {
+    if (!rejectionReason.trim()) {
+      alert("Please add a rejection reason.");
+      return;
+    }
+    rejectTicket(ticket.id, rejectionReason);
+    setShowRejectForm(false);
+    alert("Ticket REJECTED!");
+  };
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f5f6fa", padding: "2rem" }}>
       <div style={{ maxWidth: "800px", margin: "0 auto" }}>
@@ -77,8 +89,10 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
           ← Back to Tickets
         </button>
 
-        {/* Ticket Header */}
+        {/* Ticket Header Card */}
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)", marginBottom: "1.5rem" }}>
+
+          {/* Title and Badges */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
               <span style={{ fontSize: "0.8rem", color: "#999", fontWeight: "600" }}>
@@ -129,6 +143,24 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
             </div>
           </div>
 
+          {/* Attachments */}
+          {ticket.attachments.length > 0 && (
+            <div style={{ marginTop: "1rem" }}>
+              <span style={detailLabel}>Attachments</span>
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.4rem" }}>
+                {ticket.attachments.map((att) => (
+                  <a key={att.id} href={att.fileUrl} target="_blank" rel="noreferrer">
+                    <img
+                      src={att.fileUrl}
+                      alt={att.fileName}
+                      style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px", border: "1px solid #ddd", cursor: "pointer" }}
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Resolution Notes */}
           {ticket.resolutionNotes && (
             <div style={{ marginTop: "1rem", padding: "0.8rem", backgroundColor: "#f0fdf4", borderRadius: "8px", borderLeft: "4px solid #27ae60" }}>
@@ -137,10 +169,18 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
             </div>
           )}
 
+          {/* Rejection Reason */}
+          {ticket.rejectionReason && (
+            <div style={{ marginTop: "1rem", padding: "0.8rem", backgroundColor: "#fff5f5", borderRadius: "8px", borderLeft: "4px solid #e74c3c" }}>
+              <span style={detailLabel}>Rejection Reason</span>
+              <p style={{ margin: 0, color: "#333", fontSize: "0.9rem" }}>{ticket.rejectionReason}</p>
+            </div>
+          )}
+
           {/* Technician Action Buttons */}
           <div style={{ marginTop: "1.5rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
 
-            {/* Assign & Start */}
+            {/* Accept & Start */}
             {ticket.status === TicketStatus.OPEN && (
               <button
                 onClick={handleAssign}
@@ -167,6 +207,16 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
                 style={{ padding: "0.6rem 1.2rem", borderRadius: "8px", border: "none", background: "#95a5a6", color: "#fff", cursor: "pointer", fontWeight: "600" }}
               >
                 Close Ticket
+              </button>
+            )}
+
+            {/* Reject */}
+            {(ticket.status === TicketStatus.OPEN || ticket.status === TicketStatus.IN_PROGRESS) && (
+              <button
+                onClick={() => setShowRejectForm(!showRejectForm)}
+                style={{ padding: "0.6rem 1.2rem", borderRadius: "8px", border: "none", background: "#e74c3c", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+              >
+                Reject Ticket
               </button>
             )}
 
@@ -199,6 +249,35 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
               </div>
             </div>
           )}
+
+          {/* Reject Form */}
+          {showRejectForm && (
+            <div style={{ marginTop: "1rem" }}>
+              <label style={detailLabel}>Rejection Reason *</label>
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Describe why this ticket is being rejected..."
+                rows={3}
+                style={{ width: "100%", padding: "0.7rem", borderRadius: "8px", border: "1px solid #ddd", boxSizing: "border-box", resize: "vertical", fontSize: "0.9rem" }}
+              />
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                <button
+                  onClick={handleReject}
+                  style={{ padding: "0.6rem 1.2rem", borderRadius: "8px", border: "none", background: "#e74c3c", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+                >
+                  Confirm Reject
+                </button>
+                <button
+                  onClick={() => setShowRejectForm(false)}
+                  style={{ padding: "0.6rem 1.2rem", borderRadius: "8px", border: "1px solid #ccc", background: "#fff", cursor: "pointer", fontWeight: "600" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Comments Section */}

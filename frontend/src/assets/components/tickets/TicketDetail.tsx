@@ -24,12 +24,9 @@ interface TicketDetailProps {
 
 const TicketDetail = ({ ticketId }: TicketDetailProps) => {
   const navigate = useNavigate();
-  const { tickets } = useTickets();
+  const { tickets, addComment, deleteComment, editComment } = useTickets();
   const ticket = tickets.find((t) => t.id === ticketId);
 
-  const [comments, setComments] = useState<TicketComment[]>(
-    ticket?.comments ?? []
-  );
   const [newComment, setNewComment] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
@@ -38,10 +35,7 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
     return (
       <div style={{ padding: "2rem", textAlign: "center", color: "#999" }}>
         Ticket not found.{" "}
-        <span
-          style={{ color: "#1a3a6b", cursor: "pointer" }}
-          onClick={() => navigate("/tickets")}
-        >
+        <span style={{ color: "#1a3a6b", cursor: "pointer" }} onClick={() => navigate("/tickets")}>
           Go back
         </span>
       </div>
@@ -60,12 +54,12 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    setComments([...comments, comment]);
+    addComment(ticket.id, comment);
     setNewComment("");
   };
 
-  const handleDelete = (id: string) => {
-    setComments(comments.filter((c) => c.id !== id));
+  const handleDelete = (commentId: string) => {
+    deleteComment(ticket.id, commentId);
   };
 
   const handleEdit = (comment: TicketComment) => {
@@ -73,14 +67,8 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
     setEditText(comment.commentText);
   };
 
-  const handleSaveEdit = (id: string) => {
-    setComments(
-      comments.map((c) =>
-        c.id === id
-          ? { ...c, commentText: editText, isEdited: true, updatedAt: new Date().toISOString() }
-          : c
-      )
-    );
+  const handleSaveEdit = (commentId: string) => {
+    editComment(ticket.id, commentId, editText);
     setEditingId(null);
     setEditText("");
   };
@@ -97,8 +85,10 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
           ← Back to Tickets
         </button>
 
-        {/* Ticket Header */}
+        {/* Ticket Header Card */}
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)", marginBottom: "1.5rem" }}>
+          
+          {/* Title and Badges */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
               <span style={{ fontSize: "0.8rem", color: "#999", fontWeight: "600" }}>
@@ -149,6 +139,24 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
             </div>
           </div>
 
+          {/* Attachments */}
+          {ticket.attachments.length > 0 && (
+            <div style={{ marginTop: "1rem" }}>
+              <span style={detailLabel}>Attachments</span>
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.4rem" }}>
+                {ticket.attachments.map((att) => (
+                  <a key={att.id} href={att.fileUrl} target="_blank" rel="noreferrer">
+                    <img
+                      src={att.fileUrl}
+                      alt={att.fileName}
+                      style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px", border: "1px solid #ddd", cursor: "pointer" }}
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Resolution Notes */}
           {ticket.resolutionNotes && (
             <div style={{ marginTop: "1rem", padding: "0.8rem", backgroundColor: "#f0fdf4", borderRadius: "8px", borderLeft: "4px solid #27ae60" }}>
@@ -156,19 +164,28 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
               <p style={{ margin: 0, color: "#333", fontSize: "0.9rem" }}>{ticket.resolutionNotes}</p>
             </div>
           )}
+
+          {/* Rejection Reason */}
+          {ticket.rejectionReason && (
+            <div style={{ marginTop: "1rem", padding: "0.8rem", backgroundColor: "#fff5f5", borderRadius: "8px", borderLeft: "4px solid #e74c3c" }}>
+              <span style={detailLabel}>Rejection Reason</span>
+              <p style={{ margin: 0, color: "#333", fontSize: "0.9rem" }}>{ticket.rejectionReason}</p>
+            </div>
+          )}
+
         </div>
 
         {/* Comments Section */}
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
           <h3 style={{ margin: "0 0 1rem", fontSize: "1.1rem", fontWeight: "700", color: "#1a1a2e" }}>
-            Comments ({comments.length})
+            Comments ({ticket.comments.length})
           </h3>
 
-          {comments.length === 0 && (
+          {ticket.comments.length === 0 && (
             <p style={{ color: "#999", fontSize: "0.9rem" }}>No comments yet.</p>
           )}
 
-          {comments.map((comment) => (
+          {ticket.comments.map((comment) => (
             <div key={comment.id} style={{ borderBottom: "1px solid #f0f0f0", paddingBottom: "1rem", marginBottom: "1rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontWeight: "700", fontSize: "0.9rem", color: "#1a1a2e" }}>
@@ -199,7 +216,6 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
                 </p>
               )}
 
-              {/* Only show edit/delete for own comments (userId === "user1") */}
               {comment.userId === "user1" && editingId !== comment.id && (
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <button onClick={() => handleEdit(comment)} style={editBtn}>Edit</button>

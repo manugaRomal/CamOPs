@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 import { mockTickets } from "../data/ticketData";
-import type { Ticket } from "../types/ticket";
+import type { Ticket, TicketComment } from "../types/ticket";
 import { TicketStatus } from "../types/ticket";
 
 interface TicketContextType {
@@ -9,6 +9,10 @@ interface TicketContextType {
   addTicket: (ticket: Ticket) => void;
   updateTicketStatus: (id: string, status: TicketStatus, resolutionNotes?: string) => void;
   assignTicket: (id: string, technicianId: string, technicianName: string) => void;
+  rejectTicket: (id: string, rejectionReason: string) => void;
+  addComment: (ticketId: string, comment: TicketComment) => void;
+  deleteComment: (ticketId: string, commentId: string) => void;
+  editComment: (ticketId: string, commentId: string, newText: string) => void;
 }
 
 const TicketContext = createContext<TicketContextType | null>(null);
@@ -46,8 +50,60 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const rejectTicket = (id: string, rejectionReason: string) => {
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              status: TicketStatus.REJECTED,
+              rejectionReason,
+              updatedAt: new Date().toISOString(),
+            }
+          : t
+      )
+    );
+  };
+
+  const addComment = (ticketId: string, comment: TicketComment) => {
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === ticketId
+          ? { ...t, comments: [...t.comments, comment] }
+          : t
+      )
+    );
+  };
+
+  const deleteComment = (ticketId: string, commentId: string) => {
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === ticketId
+          ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) }
+          : t
+      )
+    );
+  };
+
+  const editComment = (ticketId: string, commentId: string, newText: string) => {
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === ticketId
+          ? {
+              ...t,
+              comments: t.comments.map((c) =>
+                c.id === commentId
+                  ? { ...c, commentText: newText, isEdited: true, updatedAt: new Date().toISOString() }
+                  : c
+              ),
+            }
+          : t
+      )
+    );
+  };
+
   return (
-    <TicketContext.Provider value={{ tickets, addTicket, updateTicketStatus, assignTicket }}>
+    <TicketContext.Provider value={{ tickets, addTicket, updateTicketStatus, assignTicket, rejectTicket, addComment, deleteComment, editComment }}>
       {children}
     </TicketContext.Provider>
   );

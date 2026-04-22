@@ -4,8 +4,8 @@ import DashboardRouter from "./assets/pages/dashboard/DashboardRouter";
 import CreateTicketPage from "./assets/pages/tickets/CreateTicketPage";
 import MyTicketsPage from "./assets/pages/tickets/MyTicketsPage";
 import TicketDetailPage from "./assets/pages/tickets/TicketDetailPage";
-import TechnicianTicketsPage from "./assets/pages/tickets/TechnicianTicketsPage.tsx";
-import TechnicianTicketDetailPage from "./assets/pages/tickets/TechnicianTicketDetailPage.tsx";
+import TechnicianTicketsPage from "./assets/pages/tickets/TechnicianTicketsPage";
+import TechnicianTicketDetailPage from "./assets/pages/tickets/TechnicianTicketDetailPage";
 
 function App() {
   return (

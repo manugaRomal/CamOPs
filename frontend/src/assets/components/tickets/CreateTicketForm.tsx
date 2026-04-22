@@ -54,6 +54,14 @@ const CreateTicketForm = () => {
   e.preventDefault();
   if (!validate()) return;
 
+  const ticketAttachments = attachments.map((file, index) => ({
+    id: `att-${Date.now()}-${index}`,
+    fileName: file.name,
+    fileUrl: URL.createObjectURL(file),
+    fileType: file.type,
+    uploadedAt: new Date().toISOString(),
+  }));
+
   const newTicket: Ticket = {
     id: Date.now().toString(),
     ticketCode: `TKT-${Date.now().toString().slice(-3)}`,
@@ -66,7 +74,7 @@ const CreateTicketForm = () => {
     priority: form.priority,
     preferredContact: form.preferredContact,
     status: TicketStatus.OPEN,
-    attachments: [],
+    attachments: ticketAttachments,
     comments: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
