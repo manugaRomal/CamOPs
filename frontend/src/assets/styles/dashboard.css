@@ -269,6 +269,85 @@ body {
   gap: 20px;
 }
 
+.resource-special-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.resource-qr-card,
+.resource-health-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.resource-qr-card h4,
+.resource-health-card h4 {
+  margin: 0 0 8px;
+}
+
+.resource-qr-hint {
+  margin: 0 0 12px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.resource-qr-image {
+  display: block;
+  max-width: 220px;
+  height: auto;
+}
+
+.resource-health-score-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.resource-health-score {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.resource-health-score.health-healthy {
+  color: #047857;
+}
+
+.resource-health-score.health-at-risk {
+  color: #b45309;
+}
+
+.resource-health-score.health-critical {
+  color: #b91c1c;
+}
+
+.resource-health-label {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.resource-health-meta {
+  margin: 0 0 10px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.resource-health-factors {
+  margin: 0;
+  padding-left: 18px;
+  color: #334155;
+  font-size: 14px;
+}
+
+.resource-health-factors li {
+  margin-bottom: 6px;
+}
+
 .error-text {
   color: #b91c1c;
   font-weight: 600;
@@ -351,6 +430,10 @@ th {
   .resource-filter-grid,
   .resource-form,
   .resource-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resource-special-panel {
     grid-template-columns: 1fr;
   }
 }

@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import QRCode from "qrcode";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import { resourceApi } from "../../api/resourceApi";
 import type { Resource } from "../../types/resource";
+import type { ResourceHealth } from "../../types/resourceHealth";
 
-//fixing resources
 const ResourceDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [resource, setResource] = useState<Resource | null>(null);
+  const [health, setHealth] = useState<ResourceHealth | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [healthLoading, setHealthLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -32,6 +36,37 @@ const ResourceDetailPage = () => {
     };
 
     void loadResource();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    const loadHealth = async () => {
+      try {
+        setHealthLoading(true);
+        const result = await resourceApi.getHealth(Number(id));
+        setHealth(result);
+      } catch {
+        setHealth(null);
+      } finally {
+        setHealthLoading(false);
+      }
+    };
+
+    void loadHealth();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    const detailUrl = `${window.location.origin}/resources/${id}`;
+    void QRCode.toDataURL(detailUrl, { width: 200, margin: 2, errorCorrectionLevel: "M" })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(""));
   }, [id]);
 
   const handleDelete = async () => {
@@ -111,6 +146,39 @@ const ResourceDetailPage = () => {
                   <img src={resource.resourceImage} alt={resource.resourceName} />
                 </div>
               ) : null}
+            </div>
+
+            <div className="resource-special-panel">
+              <div className="resource-qr-card">
+                <h4>Resource QR</h4>
+                <p className="resource-qr-hint">Scan to open this resource in CamOPs (same device network / deployment URL).</p>
+                {qrDataUrl ? <img className="resource-qr-image" src={qrDataUrl} alt="Resource QR code" /> : <p>QR unavailable</p>}
+              </div>
+
+              <div className="resource-health-card">
+                <h4>Health score</h4>
+                {healthLoading ? <p>Calculating health...</p> : null}
+                {!healthLoading && health ? (
+                  <>
+                    <div className="resource-health-score-row">
+                      <span className={`resource-health-score health-${health.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                        {health.score}
+                      </span>
+                      <span className="resource-health-label">{health.label}</span>
+                    </div>
+                    <p className="resource-health-meta">
+                      Open tickets: {health.openTicketCount} · Urgent open: {health.urgentOpenTicketCount} · Total linked:{" "}
+                      {health.totalTicketCount}
+                    </p>
+                    <ul className="resource-health-factors">
+                      {health.factors.map((factor) => (
+                        <li key={factor}>{factor}</li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+                {!healthLoading && !health ? <p>Health data could not be loaded.</p> : null}
+              </div>
             </div>
           </div>
         ) : null}
