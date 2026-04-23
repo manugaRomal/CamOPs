@@ -46,6 +46,10 @@ body {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.sidebar li.active-menu-item {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .main-area {
   flex: 1;
   display: flex;
@@ -162,6 +166,118 @@ body {
   background: #1d4ed8;
 }
 
+.secondary-btn {
+  background: #e5e7eb;
+  color: #1f2937;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.secondary-btn:hover {
+  background: #d1d5db;
+}
+
+.link-btn {
+  background: transparent;
+  border: none;
+  color: #1d4ed8;
+  cursor: pointer;
+  padding: 0 8px 0 0;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+}
+
+.resources-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.resource-filter-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.resource-filter-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.quick-filter-row {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.input-control {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.textarea-control {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.resource-actions-cell {
+  white-space: nowrap;
+}
+
+.resource-form-panel {
+  max-width: 900px;
+}
+
+.resource-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.resource-form .resource-filter-actions {
+  grid-column: 1 / -1;
+}
+
+.resource-image-preview {
+  grid-column: 1 / -1;
+}
+
+.resource-image-preview img {
+  max-width: 280px;
+  max-height: 160px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  object-fit: cover;
+}
+
+.resource-details-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.error-text {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.danger-btn {
+  margin-top: 16px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -229,6 +345,12 @@ th {
   }
 
   .two-column-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resource-filter-grid,
+  .resource-form,
+  .resource-details-grid {
     grid-template-columns: 1fr;
   }
 }
