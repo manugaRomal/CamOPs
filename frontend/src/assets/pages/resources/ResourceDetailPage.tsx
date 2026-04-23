@@ -5,6 +5,7 @@ import StatusBadge from "../../components/dashboard/StatusBadge";
 import { resourceApi } from "../../api/resourceApi";
 import type { Resource } from "../../types/resource";
 
+//fixing resources
 const ResourceDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
