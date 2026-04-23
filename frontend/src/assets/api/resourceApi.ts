@@ -1,4 +1,5 @@
 import type { Resource, ResourceFilter, ResourcePayload, ResourceStatus } from "../types/resource";
+import type { ResourceHealth } from "../types/resourceHealth";
 
 const API_BASE_URL = "http://localhost:8080/api/resources";
 
@@ -34,6 +35,28 @@ export const resourceApi = {
   async getById(id: number): Promise<Resource> {
     const response = await fetch(`${API_BASE_URL}/${id}`);
     return parseResponse<Resource>(response);
+  },
+
+  async getHealth(id: number): Promise<ResourceHealth> {
+    const response = await fetch(`${API_BASE_URL}/${id}/health`);
+    const data = await parseResponse<{
+      score: number;
+      label: string;
+      resourceStatus: string;
+      openTicketCount: number;
+      urgentOpenTicketCount: number;
+      totalTicketCount: number;
+      factors: string[];
+    }>(response);
+    return {
+      score: data.score,
+      label: data.label,
+      resourceStatus: data.resourceStatus,
+      openTicketCount: Number(data.openTicketCount),
+      urgentOpenTicketCount: Number(data.urgentOpenTicketCount),
+      totalTicketCount: Number(data.totalTicketCount),
+      factors: data.factors ?? [],
+    };
   },
 
   async create(payload: ResourcePayload): Promise<Resource> {
