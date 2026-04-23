@@ -5,6 +5,7 @@ import StatCard from "../../components/dashboard/StatCard";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import QuickActions from "../../components/dashboard/QuickActions";
 import ActivityFeed from "../../components/dashboard/ActivityFeed";
+import { useNavigate } from "react-router-dom";
 import {
   adminStats,
   pendingBookings,
@@ -13,6 +14,19 @@ import {
 } from "../../data/dashboardData";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+
+  const handleQuickAction = (action: string) => {
+    if (action === "Add Resource") {
+      navigate("/resources/new");
+      return;
+    }
+
+    if (action === "Approve Booking") {
+      navigate("/resources");
+    }
+  };
+
   return (
     <DashboardLayout role="ADMIN">
       <div className="dashboard-grid">
@@ -29,6 +43,7 @@ const AdminDashboard = () => {
             "Create Ticket",
             "Manage Users",
           ]}
+          onActionClick={handleQuickAction}
         />
 
         <div className="two-column-grid">
