@@ -2,13 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { categoryOptions, priorityOptions, mockResources } from "../../data/ticketData";
 import type { CreateTicketRequest } from "../../types/ticket";
-import { useTickets } from "../../context/TicketContext";
-import { TicketStatus } from "../../types/ticket";
-import type { Ticket } from "../../types/ticket";
+import * as ticketService from "../../services/ticketService";
 
 const CreateTicketForm = () => {
   const navigate = useNavigate();
-  const { addTicket } = useTickets();
 
   const [form, setForm] = useState<CreateTicketRequest>({
     category: categoryOptions[0].value,
@@ -20,6 +17,7 @@ const CreateTicketForm = () => {
 
   const [attachments, setAttachments] = useState<File[]>([]);
   const [errors, setErrors] = useState<Partial<CreateTicketRequest>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   const validate = () => {
     const newErrors: Partial<CreateTicketRequest> = {};
@@ -50,40 +48,36 @@ const CreateTicketForm = () => {
     setAttachments(attachments.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!validate()) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-  const ticketAttachments = attachments.map((file, index) => ({
-    id: `att-${Date.now()}-${index}`,
-    fileName: file.name,
-    fileUrl: URL.createObjectURL(file),
-    fileType: file.type,
-    uploadedAt: new Date().toISOString(),
-  }));
+    setSubmitting(true);
+    try {
+      const created = await ticketService.createTicket({
+        userId: 1,
+        resourceId: undefined,
+        category: form.category,
+        priority: form.priority,
+        description: form.description,
+        preferredContact: form.preferredContact,
+      });
 
-  const newTicket: Ticket = {
-    id: Date.now().toString(),
-    ticketCode: `TKT-${Date.now().toString().slice(-3)}`,
-    resourceId: form.resourceId,
-    resourceName: mockResources.find((r) => r.id === form.resourceId)?.name,
-    reportedBy: "user1",
-    reportedByName: "Nethmi Silva",
-    category: form.category,
-    description: form.description,
-    priority: form.priority,
-    preferredContact: form.preferredContact,
-    status: TicketStatus.OPEN,
-    attachments: ticketAttachments,
-    comments: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+      // Upload attachments if any
+      if (attachments.length > 0) {
+        for (const file of attachments) {
+          await ticketService.uploadAttachment(created.ticketId, file);
+        }
+      }
+
+      alert("Ticket created successfully!");
+      navigate("/tickets");
+    } catch (err) {
+      alert("Failed to create ticket. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
-
-  addTicket(newTicket);
-  alert("Ticket created successfully!");
-  navigate("/tickets");
-};
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f5f6fa", padding: "2rem" }}>
@@ -200,9 +194,10 @@ const CreateTicketForm = () => {
             </button>
             <button
               type="submit"
-              style={{ padding: "0.6rem 1.5rem", borderRadius: "8px", border: "none", background: "#1a3a6b", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+              disabled={submitting}
+              style={{ padding: "0.6rem 1.5rem", borderRadius: "8px", border: "none", background: submitting ? "#999" : "#1a3a6b", color: "#fff", cursor: submitting ? "not-allowed" : "pointer", fontWeight: "600" }}
             >
-              Submit Ticket
+              {submitting ? "Submitting..." : "Submit Ticket"}
             </button>
           </div>
 

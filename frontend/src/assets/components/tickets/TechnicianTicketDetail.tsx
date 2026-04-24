@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTickets } from "../../context/TicketContext";
 import { TicketStatus } from "../../types/ticket";
 import SLATimer from "./SLATimer";
+import * as ticketService from "../../services/ticketService";
 
 const priorityColors: Record<string, string> = {
   LOW: "#27ae60",
@@ -23,6 +24,16 @@ interface TechnicianTicketDetailProps {
   ticketId: string;
 }
 
+interface Comment {
+  commentId: number;
+  ticketId: number;
+  userId: number;
+  commentText: string;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
   const navigate = useNavigate();
   const { tickets, updateTicketStatus, assignTicket, rejectTicket } = useTickets();
@@ -32,6 +43,16 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
   const [showResolveForm, setShowResolveForm] = useState(false);
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+
+  useEffect(() => {
+    if (ticketId) {
+      ticketService.getCommentsByTicket(Number(ticketId))
+        .then(setComments)
+        .catch(() => setComments([]));
+    }
+  }, [ticketId]);
 
   if (!ticket) {
     return (
@@ -76,6 +97,20 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
     rejectTicket(ticket.id, rejectionReason);
     setShowRejectForm(false);
     alert("Ticket REJECTED!");
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    try {
+      const created = await ticketService.addComment(Number(ticketId), {
+        userId: 2,
+        commentText: newComment,
+      });
+      setComments([...comments, created]);
+      setNewComment("");
+    } catch {
+      alert("Failed to add comment");
+    }
   };
 
   return (
@@ -189,7 +224,6 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
           {/* Technician Action Buttons */}
           <div style={{ marginTop: "1.5rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
 
-            {/* Accept & Start */}
             {ticket.status === TicketStatus.OPEN && (
               <button
                 onClick={handleAssign}
@@ -199,7 +233,6 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
               </button>
             )}
 
-            {/* Resolve */}
             {ticket.status === TicketStatus.IN_PROGRESS && (
               <button
                 onClick={() => setShowResolveForm(!showResolveForm)}
@@ -209,7 +242,6 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
               </button>
             )}
 
-            {/* Close */}
             {ticket.status === TicketStatus.RESOLVED && (
               <button
                 onClick={handleClose}
@@ -219,7 +251,6 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
               </button>
             )}
 
-            {/* Reject */}
             {(ticket.status === TicketStatus.OPEN || ticket.status === TicketStatus.IN_PROGRESS) && (
               <button
                 onClick={() => setShowRejectForm(!showRejectForm)}
@@ -292,21 +323,22 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
         {/* Comments Section */}
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
           <h3 style={{ margin: "0 0 1rem", fontSize: "1.1rem", fontWeight: "700", color: "#1a1a2e" }}>
-            Comments ({ticket.comments.length})
+            Comments ({comments.length})
           </h3>
 
-          {ticket.comments.length === 0 && (
+          {comments.length === 0 && (
             <p style={{ color: "#999", fontSize: "0.9rem" }}>No comments yet.</p>
           )}
 
-          {ticket.comments.map((comment) => (
-            <div key={comment.id} style={{ borderBottom: "1px solid #f0f0f0", paddingBottom: "1rem", marginBottom: "1rem" }}>
+          {comments.map((comment) => (
+            <div key={comment.commentId} style={{ borderBottom: "1px solid #f0f0f0", paddingBottom: "1rem", marginBottom: "1rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: "700", fontSize: "0.9rem", color: "#1a1a2e" }}>
-                  {comment.userName}
+                  User {comment.userId}
+                  {comment.isEdited && <span style={{ fontSize: "0.75rem", color: "#999", marginLeft: "0.5rem" }}>(edited)</span>}
                 </span>
                 <span style={{ fontSize: "0.78rem", color: "#999" }}>
-                  {new Date(comment.createdAt).toLocaleString()}
+                  {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}
                 </span>
               </div>
               <p style={{ margin: "0.4rem 0 0", color: "#444", fontSize: "0.9rem" }}>
@@ -314,6 +346,23 @@ const TechnicianTicketDetail = ({ ticketId }: TechnicianTicketDetailProps) => {
               </p>
             </div>
           ))}
+
+          {/* Add Comment */}
+          <div style={{ marginTop: "1rem" }}>
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Write a comment as technician..."
+              rows={3}
+              style={{ width: "100%", padding: "0.7rem", borderRadius: "8px", border: "1px solid #ddd", boxSizing: "border-box", resize: "vertical", fontSize: "0.9rem" }}
+            />
+            <button
+              onClick={handleAddComment}
+              style={{ marginTop: "0.5rem", padding: "0.6rem 1.4rem", borderRadius: "8px", border: "none", background: "#1a3a6b", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+            >
+              Add Comment
+            </button>
+          </div>
         </div>
 
       </div>

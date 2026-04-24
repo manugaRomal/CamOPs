@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTickets } from "../../context/TicketContext";
-import type { TicketComment } from "../../types/ticket";
+import * as ticketService from "../../services/ticketService";
 import SLATimer from "./SLATimer";
 
 const priorityColors: Record<string, string> = {
@@ -23,14 +23,33 @@ interface TicketDetailProps {
   ticketId: string;
 }
 
+interface Comment {
+  commentId: number;
+  ticketId: number;
+  userId: number;
+  commentText: string;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const TicketDetail = ({ ticketId }: TicketDetailProps) => {
   const navigate = useNavigate();
-  const { tickets, addComment, deleteComment, editComment } = useTickets();
+  const { tickets } = useTickets();
   const ticket = tickets.find((t) => t.id === ticketId);
 
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
+
+  useEffect(() => {
+    if (ticketId) {
+      ticketService.getCommentsByTicket(Number(ticketId))
+        .then(setComments)
+        .catch(() => setComments([]));
+    }
+  }, [ticketId]);
 
   if (!ticket) {
     return (
@@ -43,35 +62,43 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
     );
   }
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newComment.trim()) return;
-    const comment: TicketComment = {
-      id: Date.now().toString(),
-      ticketId: ticket.id,
-      userId: "user1",
-      userName: "Nethmi Silva",
-      commentText: newComment,
-      isEdited: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    addComment(ticket.id, comment);
-    setNewComment("");
+    try {
+      const created = await ticketService.addComment(Number(ticketId), {
+        userId: 1,
+        commentText: newComment,
+      });
+      setComments([...comments, created]);
+      setNewComment("");
+    } catch {
+      alert("Failed to add comment");
+    }
   };
 
-  const handleDelete = (commentId: string) => {
-    deleteComment(ticket.id, commentId);
+  const handleDelete = async (commentId: number) => {
+    try {
+      await ticketService.deleteComment(commentId, 1);
+      setComments(comments.filter((c) => c.commentId !== commentId));
+    } catch {
+      alert("Failed to delete comment");
+    }
   };
 
-  const handleEdit = (comment: TicketComment) => {
-    setEditingId(comment.id);
+  const handleEdit = (comment: Comment) => {
+    setEditingId(comment.commentId);
     setEditText(comment.commentText);
   };
 
-  const handleSaveEdit = (commentId: string) => {
-    editComment(ticket.id, commentId, editText);
-    setEditingId(null);
-    setEditText("");
+  const handleSaveEdit = async (commentId: number) => {
+    try {
+      const updated = await ticketService.editComment(commentId, editText, 1);
+      setComments(comments.map((c) => c.commentId === commentId ? updated : c));
+      setEditingId(null);
+      setEditText("");
+    } catch {
+      alert("Failed to edit comment");
+    }
   };
 
   return (
@@ -88,7 +115,7 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
 
         {/* Ticket Header Card */}
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)", marginBottom: "1.5rem" }}>
-          
+
           {/* Title and Badges */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
@@ -187,26 +214,26 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
         {/* Comments Section */}
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
           <h3 style={{ margin: "0 0 1rem", fontSize: "1.1rem", fontWeight: "700", color: "#1a1a2e" }}>
-            Comments ({ticket.comments.length})
+            Comments ({comments.length})
           </h3>
 
-          {ticket.comments.length === 0 && (
+          {comments.length === 0 && (
             <p style={{ color: "#999", fontSize: "0.9rem" }}>No comments yet.</p>
           )}
 
-          {ticket.comments.map((comment) => (
-            <div key={comment.id} style={{ borderBottom: "1px solid #f0f0f0", paddingBottom: "1rem", marginBottom: "1rem" }}>
+          {comments.map((comment) => (
+            <div key={comment.commentId} style={{ borderBottom: "1px solid #f0f0f0", paddingBottom: "1rem", marginBottom: "1rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontWeight: "700", fontSize: "0.9rem", color: "#1a1a2e" }}>
-                  {comment.userName}
+                  User {comment.userId}
                   {comment.isEdited && <span style={{ fontSize: "0.75rem", color: "#999", marginLeft: "0.5rem" }}>(edited)</span>}
                 </span>
                 <span style={{ fontSize: "0.78rem", color: "#999" }}>
-                  {new Date(comment.createdAt).toLocaleString()}
+                  {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}
                 </span>
               </div>
 
-              {editingId === comment.id ? (
+              {editingId === comment.commentId ? (
                 <div style={{ marginTop: "0.5rem" }}>
                   <textarea
                     value={editText}
@@ -215,7 +242,7 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
                     style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid #ddd", boxSizing: "border-box", resize: "vertical" }}
                   />
                   <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.4rem" }}>
-                    <button onClick={() => handleSaveEdit(comment.id)} style={saveBtn}>Save</button>
+                    <button onClick={() => handleSaveEdit(comment.commentId)} style={saveBtn}>Save</button>
                     <button onClick={() => setEditingId(null)} style={cancelBtn}>Cancel</button>
                   </div>
                 </div>
@@ -225,10 +252,11 @@ const TicketDetail = ({ ticketId }: TicketDetailProps) => {
                 </p>
               )}
 
-              {comment.userId === "user1" && editingId !== comment.id && (
+              {/* Only show edit/delete for own comments (userId === 1) */}
+              {comment.userId === 1 && editingId !== comment.commentId && (
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <button onClick={() => handleEdit(comment)} style={editBtn}>Edit</button>
-                  <button onClick={() => handleDelete(comment.id)} style={deleteBtn}>Delete</button>
+                  <button onClick={() => handleDelete(comment.commentId)} style={deleteBtn}>Delete</button>
                 </div>
               )}
             </div>
