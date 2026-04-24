@@ -17,7 +17,7 @@ public class Resource {
     @Column(name = "resource_code", nullable = false, unique = true)
     private String resourceCode;
 
-    @Column(name = "resource_name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String resourceName;
 
     @Column(name = "resource_type", nullable = false)

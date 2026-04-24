@@ -21,9 +21,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceConflictException.class)
-    public ResponseEntity<Map<String, String>> handleResourceConflictException(ResourceConflictException ex) {
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> handleResourceConflictException(ResourceConflictException ex) {
+        Map<String, Object> response = new HashMap<>();
         response.put("message", ex.getMessage());
+        response.put("suggestion", ex.getSuggestion());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 

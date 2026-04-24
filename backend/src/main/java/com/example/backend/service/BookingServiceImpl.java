@@ -1,15 +1,20 @@
 package com.example.backend.service;
 
 import com.example.backend.domain.Booking;
+import com.example.backend.domain.Resource;
+import com.example.backend.dto.AlternativeResourceSuggestionDTO;
+import com.example.backend.dto.BookingConflictSuggestionDTO;
 import com.example.backend.dto.BookingRequestDTO;
 import com.example.backend.dto.BookingResponseDTO;
 import com.example.backend.exception.ResourceConflictException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.BookingRepository;
+import com.example.backend.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -24,8 +29,10 @@ public class BookingServiceImpl implements BookingService {
     private static final String APPROVED = "APPROVED";
     private static final String REJECTED = "REJECTED";
     private static final String CANCELLED = "CANCELLED";
+    private static final int MAX_ALTERNATIVE_RESOURCES = 3;
 
     private final BookingRepository bookingRepository;
+    private final ResourceRepository resourceRepository;
 
     @Override
     public BookingResponseDTO createBooking(BookingRequestDTO bookingRequestDTO) {
@@ -37,9 +44,11 @@ public class BookingServiceImpl implements BookingService {
         );
 
         if (conflictCount > 0) {
+            BookingConflictSuggestionDTO suggestion = buildConflictSuggestion(bookingRequestDTO);
             throw new ResourceConflictException(
                     "The selected resource is already booked for this time range. " +
-                            "Please check alternative times for this resource."
+                            "Please check the suggested time slot or alternative resources.",
+                    suggestion
             );
         }
 
@@ -130,6 +139,78 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalStateException("Booking status must not be null or blank.");
         }
         return status.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private BookingConflictSuggestionDTO buildConflictSuggestion(BookingRequestDTO bookingRequestDTO) {
+        BookingConflictSuggestionDTO suggestion = new BookingConflictSuggestionDTO();
+
+        List<Booking> conflicts = bookingRepository.findConflictingBookings(
+                bookingRequestDTO.getResourceId(),
+                bookingRequestDTO.getBookingDate(),
+                bookingRequestDTO.getStartTime(),
+                bookingRequestDTO.getEndTime()
+        );
+
+        LocalDateTime suggestedStart = calculateNextAvailableStart(
+                bookingRequestDTO.getStartTime(),
+                bookingRequestDTO.getEndTime(),
+                conflicts
+        );
+        Duration requestedDuration = Duration.between(bookingRequestDTO.getStartTime(), bookingRequestDTO.getEndTime());
+        LocalDateTime suggestedEnd = suggestedStart.plus(requestedDuration);
+
+        suggestion.setSuggestedStartTime(suggestedStart);
+        suggestion.setSuggestedEndTime(suggestedEnd);
+        try {
+            suggestion.setAlternativeResources(findAlternativeResources(bookingRequestDTO));
+        } catch (RuntimeException ex) {
+            // If resource lookup fails due to schema differences, keep conflict handling available.
+            suggestion.setAlternativeResources(List.of());
+        }
+        return suggestion;
+    }
+
+    private LocalDateTime calculateNextAvailableStart(LocalDateTime requestedStart, LocalDateTime requestedEnd, List<Booking> conflicts) {
+        Duration requestedDuration = Duration.between(requestedStart, requestedEnd);
+        LocalDateTime candidateStart = requestedStart;
+        LocalDateTime candidateEnd = requestedEnd;
+
+        for (Booking conflict : conflicts) {
+            boolean overlaps = conflict.getStartTime().isBefore(candidateEnd) && conflict.getEndTime().isAfter(candidateStart);
+            if (overlaps) {
+                candidateStart = conflict.getEndTime();
+                candidateEnd = candidateStart.plus(requestedDuration);
+            }
+        }
+        return candidateStart;
+    }
+
+    private List<AlternativeResourceSuggestionDTO> findAlternativeResources(BookingRequestDTO bookingRequestDTO) {
+        List<Resource> candidateResources = resourceRepository.findAlternativeResources(
+                bookingRequestDTO.getResourceId(),
+                bookingRequestDTO.getExpectedAttendees()
+        );
+
+        return candidateResources.stream()
+                .filter(resource -> bookingRepository.countConflictingBookingsForResource(
+                        resource.getResourceId(),
+                        bookingRequestDTO.getBookingDate(),
+                        bookingRequestDTO.getStartTime(),
+                        bookingRequestDTO.getEndTime()
+                ) == 0)
+                .limit(MAX_ALTERNATIVE_RESOURCES)
+                .map(this::mapToAlternativeResourceSuggestion)
+                .toList();
+    }
+
+    private AlternativeResourceSuggestionDTO mapToAlternativeResourceSuggestion(Resource resource) {
+        AlternativeResourceSuggestionDTO suggestion = new AlternativeResourceSuggestionDTO();
+        suggestion.setResourceId(resource.getResourceId());
+        suggestion.setResourceCode(resource.getResourceCode());
+        suggestion.setResourceName(resource.getResourceName());
+        suggestion.setCapacity(resource.getCapacity());
+        suggestion.setLocation(resource.getLocation());
+        return suggestion;
     }
 
     private BookingResponseDTO mapToResponseDTO(Booking booking) {
