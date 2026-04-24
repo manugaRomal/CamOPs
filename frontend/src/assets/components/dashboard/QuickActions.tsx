@@ -1,5 +1,3 @@
-//QuickActions.tsx
-
 import { useNavigate } from "react-router-dom";
 
 type QuickActionsProps = {
@@ -16,7 +14,7 @@ const QuickActions = ({ actions }: QuickActionsProps) => {
         break;
       case "My Tickets":
         navigate("/tickets");
-        break
+        break;
       case "Book Resource":
         navigate("/bookings/create");
         break;
@@ -25,6 +23,18 @@ const QuickActions = ({ actions }: QuickActionsProps) => {
         break;
       case "View Assigned Tickets":
         navigate("/technician/tickets");
+        break;
+      case "Manage Tickets":
+        navigate("/admin/tickets");
+        break;
+      case "Add Resource":
+        navigate("/resources/add");
+        break;
+      case "Approve Booking":
+        navigate("/bookings");
+        break;
+      case "Manage Users":
+        navigate("/users");
         break;
       default:
         break;

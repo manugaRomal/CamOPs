@@ -9,10 +9,10 @@ const Sidebar = ({ role }: SidebarProps) => {
 
   const menuByRole: Record<string, { label: string; path: string }[]> = {
     ADMIN: [
-      { label: "Dashboard", path: "/" },
+      { label: "Dashboard", path: "/admin" },
+      { label: "All Tickets", path: "/admin/tickets" },
       { label: "Resources", path: "/resources" },
       { label: "Bookings", path: "/bookings" },
-      { label: "Tickets", path: "/tickets" },
       { label: "Users", path: "/users" },
       { label: "Notifications", path: "/notifications" },
       { label: "Analytics", path: "/analytics" },
@@ -62,9 +62,17 @@ const Sidebar = ({ role }: SidebarProps) => {
           {role !== "TECHNICIAN" && (
             <button
               onClick={() => navigate("/technician")}
-              style={{ width: "100%", padding: "0.4rem", borderRadius: "6px", border: "none", background: "rgba(255,255,255,0.15)", color: "#fff", cursor: "pointer", fontSize: "0.8rem" }}
+              style={{ width: "100%", padding: "0.4rem", borderRadius: "6px", border: "none", background: "rgba(255,255,255,0.15)", color: "#fff", cursor: "pointer", fontSize: "0.8rem", marginBottom: "0.4rem" }}
             >
               🔧 Technician View
+            </button>
+          )}
+          {role !== "ADMIN" && (
+            <button
+              onClick={() => navigate("/admin")}
+              style={{ width: "100%", padding: "0.4rem", borderRadius: "6px", border: "none", background: "rgba(255,255,255,0.15)", color: "#fff", cursor: "pointer", fontSize: "0.8rem" }}
+            >
+              👑 Admin View
             </button>
           )}
         </div>

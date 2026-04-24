@@ -25,6 +25,17 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Mock technician names - replace with API call when Member 4 is done
+  const mockTechnicians: Record<number, string> = {
+    2: "Kamal Perera",
+    3: "Nimal Silva",
+    4: "Saman Fernando",
+  };
+
+  const getTechnicianName = (technicianId: number): string => {
+    return mockTechnicians[technicianId] ?? `Technician ${technicianId}`;
+  };
+
   const fetchTickets = async () => {
     setLoading(true);
     try {
@@ -40,7 +51,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
             reportedBy: String(t.userId),
             reportedByName: "User " + t.userId,
             assignedTo: t.assignedTo ? String(t.assignedTo) : undefined,
-            assignedToName: t.assignedToName,
+            assignedToName: t.assignedTo ? getTechnicianName(t.assignedTo) : undefined,
             category: t.category,
             description: t.description,
             priority: t.priority,

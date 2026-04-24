@@ -21,6 +21,13 @@ export const getTicketsByUser = async (userId: number) => {
   return response.json();
 };
 
+// Get tickets by assigned technician
+export const getTicketsByAssignedTo = async (technicianId: number) => {
+  const response = await fetch(`${BASE_URL}/tickets/assigned/${technicianId}`);
+  if (!response.ok) throw new Error("Failed to fetch assigned tickets");
+  return response.json();
+};
+
 // Create ticket
 export const createTicket = async (ticket: {
   userId: number;
@@ -37,7 +44,7 @@ export const createTicket = async (ticket: {
     description: ticket.description,
     preferredContact: ticket.preferredContact,
   };
-  
+
   const response = await fetch(`${BASE_URL}/tickets`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -55,6 +62,17 @@ export const updateTicketStatus = async (id: number, status: string) => {
     body: JSON.stringify({ status }),
   });
   if (!response.ok) throw new Error("Failed to update ticket status");
+  return response.json();
+};
+
+// Assign ticket to technician (Admin)
+export const assignTicket = async (ticketId: number, technicianId: number) => {
+  const response = await fetch(`${BASE_URL}/tickets/${ticketId}/assign`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ technicianId }),
+  });
+  if (!response.ok) throw new Error("Failed to assign ticket");
   return response.json();
 };
 
