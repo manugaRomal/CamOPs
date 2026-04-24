@@ -9,6 +9,8 @@ public interface BookingService {
 
     BookingResponseDTO createBooking(BookingRequestDTO bookingRequestDTO);
 
+    BookingResponseDTO getBookingById(Long bookingId);
+
     BookingResponseDTO updateBookingStatus(Long bookingId, String newStatus, Long reviewedBy, String reviewReason);
 
     List<BookingResponseDTO> getAllBookings();

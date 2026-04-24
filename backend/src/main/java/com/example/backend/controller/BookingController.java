@@ -24,6 +24,9 @@ import java.util.Objects;
 @CrossOrigin
 public class BookingController {
 
+    private static final String APPROVED = "APPROVED";
+    private static final String CANCELLED = "CANCELLED";
+
     private final BookingService bookingService;
 
     public BookingController(BookingService bookingService) {
@@ -54,6 +57,12 @@ public class BookingController {
         return ResponseEntity.ok(bookings);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<BookingResponseDTO> getBookingById(@PathVariable Long id) {
+        BookingResponseDTO booking = bookingService.getBookingById(id);
+        return ResponseEntity.ok(booking);
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<BookingResponseDTO> updateBookingStatus(
             @PathVariable Long id,
@@ -62,6 +71,26 @@ public class BookingController {
             @RequestParam String reviewReason
     ) {
         BookingResponseDTO updatedBooking = bookingService.updateBookingStatus(id, status, reviewedBy, reviewReason);
+        return ResponseEntity.ok(updatedBooking);
+    }
+
+    @PatchMapping("/{id}/approve")
+    public ResponseEntity<BookingResponseDTO> approveBooking(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long reviewedBy,
+            @RequestParam(required = false) String reviewReason
+    ) {
+        BookingResponseDTO updatedBooking = bookingService.updateBookingStatus(id, APPROVED, reviewedBy, reviewReason);
+        return ResponseEntity.ok(updatedBooking);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponseDTO> cancelBooking(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long reviewedBy,
+            @RequestParam(required = false) String reviewReason
+    ) {
+        BookingResponseDTO updatedBooking = bookingService.updateBookingStatus(id, CANCELLED, reviewedBy, reviewReason);
         return ResponseEntity.ok(updatedBooking);
     }
 }

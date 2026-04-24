@@ -4,6 +4,7 @@ import com.example.backend.domain.Booking;
 import com.example.backend.dto.BookingRequestDTO;
 import com.example.backend.dto.BookingResponseDTO;
 import com.example.backend.exception.ResourceConflictException;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,9 +58,17 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public BookingResponseDTO getBookingById(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+        return mapToResponseDTO(booking);
+    }
+
+    @Override
     public BookingResponseDTO updateBookingStatus(Long bookingId, String newStatus, Long reviewedBy, String reviewReason) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
 
         String normalizedCurrentStatus = normalizeStatus(booking.getStatus());
         String normalizedNewStatus = normalizeStatus(newStatus);
