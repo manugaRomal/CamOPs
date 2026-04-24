@@ -5,6 +5,7 @@ import com.example.backend.repository.TicketCommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +28,8 @@ public class TicketCommentService {
     // Add comment
     public TicketComment addComment(TicketComment comment) {
         comment.setIsEdited(false);
+        comment.setCreatedAt(LocalDateTime.now());
+        comment.setUpdatedAt(LocalDateTime.now());
         return ticketCommentRepository.save(comment);
     }
 
@@ -45,6 +48,7 @@ public class TicketCommentService {
 
         comment.setCommentText(newText);
         comment.setIsEdited(true);
+        comment.setUpdatedAt(LocalDateTime.now());
         return ticketCommentRepository.save(comment);
     }
 

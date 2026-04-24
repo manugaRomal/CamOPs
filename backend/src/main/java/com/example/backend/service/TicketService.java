@@ -39,9 +39,10 @@ public class TicketService {
     public Ticket createTicket(Ticket ticket) {
         ticket.setStatus("OPEN");
         ticket.setPriority(ticket.getPriority() != null ? ticket.getPriority() : "MEDIUM");
-        // Generate ticket code
         String ticketCode = "TKT-" + System.currentTimeMillis();
         ticket.setTicketCode(ticketCode);
+        ticket.setCreatedAt(LocalDateTime.now());
+        ticket.setUpdatedAt(LocalDateTime.now());
         return ticketRepository.save(ticket);
     }
 
@@ -53,6 +54,7 @@ public class TicketService {
         }
         Ticket ticket = optionalTicket.get();
         ticket.setStatus(status);
+        ticket.setUpdatedAt(LocalDateTime.now());
 
         if (status.equals("RESOLVED")) {
             ticket.setResolvedAt(LocalDateTime.now());
@@ -71,6 +73,7 @@ public class TicketService {
         }
         Ticket ticket = optionalTicket.get();
         ticket.setStatus("IN_PROGRESS");
+        ticket.setUpdatedAt(LocalDateTime.now());
         return ticketRepository.save(ticket);
     }
 
@@ -84,6 +87,7 @@ public class TicketService {
         ticket.setStatus("RESOLVED");
         ticket.setResolutionNotes(resolutionNotes);
         ticket.setResolvedAt(LocalDateTime.now());
+        ticket.setUpdatedAt(LocalDateTime.now());
         return ticketRepository.save(ticket);
     }
 
@@ -96,6 +100,7 @@ public class TicketService {
         Ticket ticket = optionalTicket.get();
         ticket.setStatus("REJECTED");
         ticket.setRejectionReason(rejectionReason);
+        ticket.setUpdatedAt(LocalDateTime.now());
         return ticketRepository.save(ticket);
     }
 
@@ -108,6 +113,7 @@ public class TicketService {
         Ticket ticket = optionalTicket.get();
         ticket.setStatus("CLOSED");
         ticket.setClosedAt(LocalDateTime.now());
+        ticket.setUpdatedAt(LocalDateTime.now());
         return ticketRepository.save(ticket);
     }
 

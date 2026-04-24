@@ -24,10 +24,10 @@ public class TicketComment {
     @Column(name = "is_edited", nullable = false)
     private Boolean isEdited = false;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", insertable = false, updatable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Constructor
@@ -50,5 +50,8 @@ public class TicketComment {
     public void setIsEdited(Boolean isEdited) { this.isEdited = isEdited; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
