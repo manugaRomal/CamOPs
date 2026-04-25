@@ -1,6 +1,7 @@
 //DashboardRouter.tsx
 
 import AdminDashboard from "./AdminDashboard";
+import StudentDashboard from "./StudentDashboard";
 import UserDashboard from "./UserDashboard";
 import TechnicianDashboard from "./TechnicianDashboard";
 
@@ -14,6 +15,8 @@ const DashboardRouter = ({ role }: DashboardRouterProps) => {
       return <AdminDashboard />;
     case "TECHNICIAN":
       return <TechnicianDashboard />;
+    case "STUDENT":
+      return <StudentDashboard />;
     case "USER":
     default:
       return <UserDashboard />;

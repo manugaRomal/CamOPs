@@ -14,13 +14,20 @@ const Sidebar = ({ role }: SidebarProps) => {
     ADMIN: [
       { label: "Dashboard", path: "/" },
       { label: "Resources", path: "/resources" },
-      { label: "Bookings" },
+      { label: "Bookings", path: "/bookings" },
       { label: "Tickets" },
       { label: "Users" },
       { label: "Notifications" },
       { label: "Analytics" },
     ],
     USER: [{ label: "Dashboard", path: "/" }, { label: "My Bookings" }, { label: "My Tickets" }, { label: "Notifications" }],
+
+    STUDENT: [
+      { label: "Dashboard", path: "/" },
+      { label: "Resources", path: "/resources" },
+      { label: "My Bookings", path: "/" },
+      { label: "Notifications" },
+    ],
     TECHNICIAN: [
       { label: "Dashboard", path: "/" },
       { label: "Assigned Tickets" },
@@ -43,6 +50,13 @@ const Sidebar = ({ role }: SidebarProps) => {
     "Work Updates": "△",
   };
 
+
+  const fallbackPathByLabel: Record<string, string> = {
+    Dashboard: "/",
+    Resources: "/resources",
+    Bookings: "/bookings",
+  };
+
   const menuItems = menuByRole[role] || [{ label: "Dashboard", path: "/" }];
 
   return (
@@ -58,8 +72,11 @@ const Sidebar = ({ role }: SidebarProps) => {
       <div className="sidebar-section-label">Workspace</div>
       <ul className="sidebar-menu">
         {menuItems.map((item) => {
-          const isActive = item.path
-            ? location.pathname === item.path || (item.path === "/resources" && location.pathname.startsWith("/resources/"))
+          const resolvedPath = item.path ?? fallbackPathByLabel[item.label];
+          const isActive = resolvedPath
+            ? location.pathname === resolvedPath ||
+              (resolvedPath === "/resources" && location.pathname.startsWith("/resources/")) ||
+              (resolvedPath === "/bookings" && location.pathname.startsWith("/bookings/"))
             : false;
 
           return (
@@ -67,8 +84,8 @@ const Sidebar = ({ role }: SidebarProps) => {
               key={item.label}
               className={isActive ? "active-menu-item" : ""}
               onClick={() => {
-                if (item.path) {
-                  navigate(item.path);
+                if (resolvedPath) {
+                  navigate(resolvedPath);
                 }
               }}
             >
