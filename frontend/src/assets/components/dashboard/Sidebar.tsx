@@ -29,26 +29,64 @@ const Sidebar = ({ role }: SidebarProps) => {
     ],
   };
 
+  const iconByLabel: Record<string, string> = {
+    Dashboard: "◫",
+    Resources: "⌂",
+    Bookings: "◷",
+    Tickets: "☰",
+    Users: "◌",
+    Notifications: "◔",
+    Analytics: "△",
+    "My Bookings": "◷",
+    "My Tickets": "☰",
+    "Assigned Tickets": "☰",
+    "Work Updates": "△",
+  };
+
   const menuItems = menuByRole[role] || [{ label: "Dashboard", path: "/" }];
 
   return (
     <aside className="sidebar">
-      <div className="logo">CamOPs</div>
-      <ul>
-        {menuItems.map((item) => (
-          <li
-            key={item.label}
-            className={item.path && location.pathname === item.path ? "active-menu-item" : ""}
-            onClick={() => {
-              if (item.path) {
-                navigate(item.path);
-              }
-            }}
-          >
-            {item.label}
-          </li>
-        ))}
+      <div className="sidebar-header">
+        <div className="brand-mark">C</div>
+        <div>
+          <div className="logo">CamOps</div>
+          <p className="logo-subtitle">Operations</p>
+        </div>
+      </div>
+
+      <div className="sidebar-section-label">Workspace</div>
+      <ul className="sidebar-menu">
+        {menuItems.map((item) => {
+          const isActive = item.path
+            ? location.pathname === item.path || (item.path === "/resources" && location.pathname.startsWith("/resources/"))
+            : false;
+
+          return (
+            <li
+              key={item.label}
+              className={isActive ? "active-menu-item" : ""}
+              onClick={() => {
+                if (item.path) {
+                  navigate(item.path);
+                }
+              }}
+            >
+              <span className="menu-icon">{iconByLabel[item.label] ?? "•"}</span>
+              <span>{item.label}</span>
+              {item.label === "Notifications" ? <span className="menu-pill">4</span> : null}
+            </li>
+          );
+        })}
       </ul>
+
+      <div className="sidebar-profile-card">
+        <div className="sidebar-avatar">AD</div>
+        <div>
+          <p className="sidebar-profile-name">Alex Dean</p>
+          <p className="sidebar-profile-role">{role === "ADMIN" ? "Administrator" : role}</p>
+        </div>
+      </div>
     </aside>
   );
 };
