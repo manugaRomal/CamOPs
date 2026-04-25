@@ -162,6 +162,7 @@ CREATE TABLE Notification (
     read_at DATETIME,
     related_ticket_id BIGINT,
     related_booking_id BIGINT,
+    batch_id VARCHAR(36),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (related_ticket_id) REFERENCES Ticket(ticket_id),

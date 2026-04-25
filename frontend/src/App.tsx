@@ -5,11 +5,13 @@ import { ProtectedRoute } from "./auth/ProtectedRoute";
 import LoginPage from "./assets/pages/LoginPage";
 import DashboardRouter from "./assets/pages/dashboard/DashboardRouter";
 import BookingListPage from "./assets/pages/bookings/BookingListPage";
+import BookingCalendarPage from "./assets/pages/bookings/BookingCalendarPage";
 import ResourceDetailPage from "./assets/pages/resources/ResourceDetailPage";
 import ResourceFormPage from "./assets/pages/resources/ResourceFormPage";
 import ResourceListPage from "./assets/pages/resources/ResourceListPage";
 import AuthCallbackPage from "./assets/pages/auth/AuthCallbackPage";
 import NotificationsPage from "./assets/pages/notifications/NotificationsPage";
+import AdminNotificationsPage from "./assets/pages/admin/AdminNotificationsPage";
 import ProfilePage from "./assets/pages/profile/ProfilePage";
 import "./assets/styles/dashboard.css";
 
@@ -37,10 +39,28 @@ function App() {
             }
           />
           <Route
+            path="/bookings/calendar"
+            element={
+              <ProtectedRoute>
+                <BookingCalendarPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/notifications"
             element={
               <ProtectedRoute>
                 <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/notifications"
+            element={
+              <ProtectedRoute>
+                <AdminOnlyRoute>
+                  <AdminNotificationsPage />
+                </AdminOnlyRoute>
               </ProtectedRoute>
             }
           />

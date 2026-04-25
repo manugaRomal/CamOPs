@@ -53,10 +53,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         if (appProperties.getSecurity().isPermitAll()) {
+            // Still install JWT so Bearer tokens resolve to a principal; @PreAuthorize on API
+            // methods can authenticate users even when the filter chain is otherwise permissive.
             return http
                     .cors(c -> c.configurationSource(corsConfigurationSource()))
                     .csrf(AbstractHttpConfigurer::disable)
                     .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                     .authorizeHttpRequests(a -> a.anyRequest().permitAll())
                     .build();
         }

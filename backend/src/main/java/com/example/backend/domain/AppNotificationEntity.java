@@ -6,7 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Notification")
+@Table(name = "notification")
 public class AppNotificationEntity {
 
     @Id
@@ -37,6 +37,10 @@ public class AppNotificationEntity {
 
     @Column(name = "related_booking_id")
     private Long relatedBookingId;
+
+    /** Present when the row is part of an admin broadcast (same id for all recipient rows). */
+    @Column(name = "batch_id", length = 36)
+    private String batchId;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -112,6 +116,14 @@ public class AppNotificationEntity {
 
     public void setRelatedBookingId(Long relatedBookingId) {
         this.relatedBookingId = relatedBookingId;
+    }
+
+    public String getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(String batchId) {
+        this.batchId = batchId;
     }
 
     public LocalDateTime getCreatedAt() {

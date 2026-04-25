@@ -31,9 +31,11 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
       { label: "Profile", path: "/profile" },
       { label: "Resources", path: "/resources" },
       { label: "Bookings", path: "/bookings" },
+      { label: "Calendar", path: "/bookings/calendar" },
       { label: "Tickets" },
       { label: "Users" },
       { label: "Notifications", path: "/notifications" },
+      { label: "Announcements", path: "/admin/notifications" },
       { label: "Analytics" },
     ],
     USER: [
@@ -46,12 +48,14 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
       { label: "Dashboard", path: "/" },
       { label: "Profile", path: "/profile" },
       { label: "Resources", path: "/resources" },
+      { label: "Calendar", path: "/bookings/calendar" },
       { label: "My Bookings", path: "/" },
       { label: "Notifications", path: "/notifications" },
     ],
     TECHNICIAN: [
       { label: "Dashboard", path: "/" },
       { label: "Profile", path: "/profile" },
+      { label: "Calendar", path: "/bookings/calendar" },
       { label: "Assigned Tickets" },
       { label: "Work Updates" },
       { label: "Notifications", path: "/notifications" },
@@ -66,7 +70,9 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
     Tickets: "☰",
     Users: "◌",
     Notifications: "◔",
+    Announcements: "◕",
     Analytics: "△",
+    Calendar: "◶",
     "My Bookings": "◷",
     "My Tickets": "☰",
     "Assigned Tickets": "☰",
@@ -77,7 +83,9 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
     Dashboard: "/",
     Resources: "/resources",
     Bookings: "/bookings",
+    Calendar: "/bookings/calendar",
     Notifications: "/notifications",
+    Announcements: "/admin/notifications",
   };
 
   const menuItems = menuByRole[role] ?? menuByRole.STUDENT;
@@ -100,11 +108,14 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
         {menuItems.map((item) => {
           const resolvedPath = item.path ?? fallbackPathByLabel[item.label];
           const isActive = resolvedPath
-            ? location.pathname === resolvedPath ||
-              (resolvedPath === "/resources" && location.pathname.startsWith("/resources")) ||
-              (resolvedPath === "/bookings" && location.pathname.startsWith("/bookings")) ||
-              (resolvedPath === "/profile" && location.pathname.startsWith("/profile")) ||
-              (resolvedPath === "/notifications" && location.pathname.startsWith("/notifications"))
+            ? (resolvedPath === "/bookings"
+                ? location.pathname === "/bookings"
+                : resolvedPath === "/bookings/calendar"
+                  ? location.pathname === "/bookings/calendar"
+                  : location.pathname === resolvedPath ||
+                    (resolvedPath === "/resources" && location.pathname.startsWith("/resources")) ||
+                    (resolvedPath === "/profile" && location.pathname.startsWith("/profile")) ||
+                    (resolvedPath === "/notifications" && location.pathname.startsWith("/notifications")))
             : false;
 
           return (
