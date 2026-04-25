@@ -1,3 +1,6 @@
+# Local Spring configuration (secrets, env-specific)
+src/main/resources/application.properties
+
 # Maven target folder
 /target/
 
