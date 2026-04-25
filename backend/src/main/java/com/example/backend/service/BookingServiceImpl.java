@@ -6,6 +6,7 @@ import com.example.backend.dto.AlternativeResourceSuggestionDTO;
 import com.example.backend.dto.BookingConflictSuggestionDTO;
 import com.example.backend.dto.BookingRequestDTO;
 import com.example.backend.dto.BookingResponseDTO;
+import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.ResourceConflictException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.BookingRepository;
@@ -102,6 +103,18 @@ public class BookingServiceImpl implements BookingService {
 
         Booking updatedBooking = bookingRepository.save(booking);
         return mapToResponseDTO(updatedBooking);
+    }
+
+    @Override
+    public BookingResponseDTO cancelBookingByStudent(Long bookingId, Long studentUserId, String cancelReason) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+
+        if (!booking.getUserId().equals(studentUserId)) {
+            throw new BadRequestException("Student can only cancel their own booking.");
+        }
+
+        return updateBookingStatus(bookingId, CANCELLED, studentUserId, cancelReason);
     }
 
     @Override

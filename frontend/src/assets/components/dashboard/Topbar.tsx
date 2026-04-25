@@ -10,10 +10,12 @@ const Topbar = ({ role }: TopbarProps) => {
   const location = useLocation();
 
   const pathSegments = location.pathname.split("/").filter(Boolean);
-  const currentPage = pathSegments[pathSegments.length - 1] ?? "dashboard";
-  const pageLabel = currentPage
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (character) => character.toUpperCase());
+  const breadcrumb =
+    pathSegments.length === 0
+      ? "Dashboard"
+      : pathSegments
+          .map((segment) => segment.replace(/-/g, " ").replace(/\b\w/g, (character) => character.toUpperCase()))
+          .join(" / ");
 
   return (
     <header className="topbar">
@@ -21,9 +23,7 @@ const Topbar = ({ role }: TopbarProps) => {
         <h2>Smart Campus Operations Hub</h2>
         <p>
           <span className="topbar-role-tag">{role}</span>
-          <span className="topbar-breadcrumb">
-            {pathSegments.length === 0 ? "Dashboard" : `Resources / ${pageLabel}`}
-          </span>
+          <span className="topbar-breadcrumb">{breadcrumb}</span>
         </p>
       </div>
       <div className="topbar-right">

@@ -25,6 +25,7 @@ import java.util.Objects;
 public class BookingController {
 
     private static final String APPROVED = "APPROVED";
+    private static final String REJECTED = "REJECTED";
     private static final String CANCELLED = "CANCELLED";
 
     private final BookingService bookingService;
@@ -84,13 +85,23 @@ public class BookingController {
         return ResponseEntity.ok(updatedBooking);
     }
 
-    @PatchMapping("/{id}/cancel")
-    public ResponseEntity<BookingResponseDTO> cancelBooking(
+    @PatchMapping("/{id}/reject")
+    public ResponseEntity<BookingResponseDTO> rejectBooking(
             @PathVariable Long id,
             @RequestParam(required = false) Long reviewedBy,
             @RequestParam(required = false) String reviewReason
     ) {
-        BookingResponseDTO updatedBooking = bookingService.updateBookingStatus(id, CANCELLED, reviewedBy, reviewReason);
+        BookingResponseDTO updatedBooking = bookingService.updateBookingStatus(id, REJECTED, reviewedBy, reviewReason);
+        return ResponseEntity.ok(updatedBooking);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponseDTO> cancelBookingByStudent(
+            @PathVariable Long id,
+            @RequestParam Long studentUserId,
+            @RequestParam(required = false) String cancelReason
+    ) {
+        BookingResponseDTO updatedBooking = bookingService.cancelBookingByStudent(id, studentUserId, cancelReason);
         return ResponseEntity.ok(updatedBooking);
     }
 }

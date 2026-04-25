@@ -13,6 +13,8 @@ public interface BookingService {
 
     BookingResponseDTO updateBookingStatus(Long bookingId, String newStatus, Long reviewedBy, String reviewReason);
 
+    BookingResponseDTO cancelBookingByStudent(Long bookingId, Long studentUserId, String cancelReason);
+
     List<BookingResponseDTO> getAllBookings();
 
     List<BookingResponseDTO> getUserBookings(Long userId);

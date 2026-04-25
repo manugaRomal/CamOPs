@@ -543,6 +543,12 @@ body {
   margin: 12px 20px 0;
 }
 
+.success-text {
+  color: #047857;
+  font-weight: 600;
+  margin: 12px 20px 0;
+}
+
 .danger-btn {
   margin-top: 16px;
 }
@@ -940,6 +946,93 @@ th {
   flex-shrink: 0;
 }
 
+.booking-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1200;
+}
+
+.booking-modal-card {
+  background: #fff;
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 24px 40px rgba(15, 23, 42, 0.25);
+}
+
+.booking-modal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.booking-modal-details p {
+  margin: 0;
+}
+
+.booking-modal-purpose {
+  line-height: 1.5;
+}
+
+.booking-modal-inputs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.booking-modal-inputs label {
+  font-size: 13px;
+  color: #475569;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.booking-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.booking-modal-error {
+  margin: 0 0 10px;
+}
+
+.student-id-panel {
+  max-width: 420px;
+}
+
+.student-booking-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.student-form-full-width {
+  grid-column: 1 / -1;
+}
+
+.student-form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.student-cancel-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
 @media (max-width: 1100px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -955,7 +1048,8 @@ th {
 
   .resource-filter-grid,
   .resource-form,
-  .resource-details-grid {
+  .resource-details-grid,
+  .student-booking-form {
     grid-template-columns: 1fr;
   }
 
