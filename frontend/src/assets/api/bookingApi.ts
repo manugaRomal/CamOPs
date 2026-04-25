@@ -1,7 +1,21 @@
-import type { Booking } from "../types/booking";
+import type { Booking, BookingConflictSuggestion } from "../types/booking";
 import { apiFetch } from "./apiFetch";
 
-const API_BASE = "/api/bookings";
+const API_BASE_URL = "/api/bookings";
+
+export class BookingConflictError extends Error {
+  readonly suggestion: BookingConflictSuggestion;
+
+  constructor(message: string, suggestion: BookingConflictSuggestion) {
+    super(message);
+    this.name = "BookingConflictError";
+    this.suggestion = suggestion;
+  }
+}
+
+export function isBookingConflictError(value: unknown): value is BookingConflictError {
+  return value instanceof BookingConflictError;
+}
 
 async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -18,12 +32,12 @@ export const bookingApi = {
       params.set("userId", String(userId));
     }
     const query = params.toString();
-    const response = await apiFetch(`${API_BASE}${query ? `?${query}` : ""}`);
+    const response = await apiFetch(`${API_BASE_URL}${query ? `?${query}` : ""}`);
     return parseResponse<Booking[]>(response);
   },
 
   async getById(id: number): Promise<Booking> {
-    const response = await apiFetch(`${API_BASE}/${id}`);
+    const response = await apiFetch(`${API_BASE_URL}/${id}`);
     return parseResponse<Booking>(response);
   },
 
@@ -36,7 +50,7 @@ export const bookingApi = {
       params.set("reviewReason", reviewReason.trim());
     }
     const query = params.toString();
-    const response = await apiFetch(`${API_BASE}/${id}/approve${query ? `?${query}` : ""}`, {
+    const response = await apiFetch(`${API_BASE_URL}/${id}/approve${query ? `?${query}` : ""}`, {
       method: "PATCH",
     });
     return parseResponse<Booking>(response);
@@ -51,7 +65,7 @@ export const bookingApi = {
       params.set("reviewReason", reviewReason.trim());
     }
     const query = params.toString();
-    const response = await apiFetch(`${API_BASE}/${id}/reject${query ? `?${query}` : ""}`, {
+    const response = await apiFetch(`${API_BASE_URL}/${id}/reject${query ? `?${query}` : ""}`, {
       method: "PATCH",
     });
     return parseResponse<Booking>(response);
@@ -67,11 +81,25 @@ export const bookingApi = {
     expectedAttendees?: number;
   }): Promise<Booking> {
     const { userId: _u, ...body } = payload;
-    const response = await apiFetch(API_BASE, {
+    const response = await apiFetch(API_BASE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+    if (response.status === 409) {
+      const errorBody = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        suggestion?: BookingConflictSuggestion;
+      };
+      throw new BookingConflictError(
+        errorBody.message ?? "The selected time slot is not available.",
+        errorBody.suggestion ?? {
+          suggestedStartTime: "",
+          suggestedEndTime: "",
+          alternativeResources: [],
+        }
+      );
+    }
     return parseResponse<Booking>(response);
   },
 
@@ -81,7 +109,7 @@ export const bookingApi = {
       params.set("cancelReason", cancelReason.trim());
     }
     const q = params.toString();
-    const response = await apiFetch(`${API_BASE}/${id}/cancel${q ? `?${q}` : ""}`, {
+    const response = await apiFetch(`${API_BASE_URL}/${id}/cancel${q ? `?${q}` : ""}`, {
       method: "PATCH",
     });
     return parseResponse<Booking>(response);

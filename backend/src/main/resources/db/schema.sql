@@ -28,6 +28,7 @@ CREATE TABLE Users (
     department VARCHAR(100),
     profile_image_url VARCHAR(500),
     google_sub VARCHAR(255) UNIQUE,
+    password_hash VARCHAR(255) NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -138,12 +139,14 @@ CREATE TABLE Bookings (
     expected_attendees INT,
     status VARCHAR(30) DEFAULT 'PENDING',
     approved_at DATETIME,
+    reviewed_by BIGINT,
     review_reasons VARCHAR(500),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CHECK (end_time > start_time),
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (resource_id) REFERENCES Resources(resource_id)
+    FOREIGN KEY (resource_id) REFERENCES Resources(resource_id),
+    FOREIGN KEY (reviewed_by) REFERENCES Users(user_id)
 );
 
 /* ============================================================

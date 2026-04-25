@@ -1,25 +1,28 @@
 package com.example.backend.controller.dto;
 
+import com.example.backend.dto.auth.AuthUserResponse;
+
 /**
  * Returned from PATCH /api/auth/me so the client can replace the stored JWT (name may have changed).
  */
 public class PatchProfileResponse {
 
-    private CurrentUserResponse profile;
+    private AuthUserResponse profile;
     private String accessToken;
 
-    public PatchProfileResponse() {}
+    public PatchProfileResponse() {
+    }
 
-    public PatchProfileResponse(CurrentUserResponse profile, String accessToken) {
+    public PatchProfileResponse(AuthUserResponse profile, String accessToken) {
         this.profile = profile;
         this.accessToken = accessToken;
     }
 
-    public CurrentUserResponse getProfile() {
+    public AuthUserResponse getProfile() {
         return profile;
     }
 
-    public void setProfile(CurrentUserResponse profile) {
+    public void setProfile(AuthUserResponse profile) {
         this.profile = profile;
     }
 

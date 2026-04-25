@@ -11,6 +11,8 @@ import com.example.backend.exception.ResourceConflictException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.BookingRepository;
 import com.example.backend.repository.ResourceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,8 @@ import java.util.Set;
 @Service
 @Transactional
 public class BookingServiceImpl implements BookingService {
+
+    private static final Logger log = LoggerFactory.getLogger(BookingServiceImpl.class);
 
     private static final String PENDING = "PENDING";
     private static final String APPROVED = "APPROVED";
@@ -46,6 +50,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDTO createBooking(BookingRequestDTO bookingRequestDTO) {
+        resourceRepository.findById(bookingRequestDTO.getResourceId())
+                .orElseThrow(() -> new ResourceNotFoundException("Resource not found: " + bookingRequestDTO.getResourceId()));
         long conflictCount = bookingRepository.countConflictingBookings(
                 bookingRequestDTO.getResourceId(),
                 bookingRequestDTO.getBookingDate(),
@@ -73,6 +79,17 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(PENDING);
 
         Booking savedBooking = bookingRepository.save(booking);
+        try {
+            notificationService.create(
+                    savedBooking.getUserId(),
+                    NotificationService.TYPE_BOOKING_SUBMITTED,
+                    "Booking request submitted",
+                    "Your booking request #" + savedBooking.getBookingId() + " is pending review.",
+                    savedBooking.getBookingId()
+            );
+        } catch (Exception e) {
+            log.warn("Could not create submitted notification: {}", e.getMessage());
+        }
         return mapToResponseDTO(savedBooking);
     }
 
@@ -111,14 +128,44 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Booking updatedBooking = bookingRepository.save(booking);
-        if (APPROVED.equals(normalizedNewStatus) || REJECTED.equals(normalizedNewStatus)) {
-            notificationService.notifyBookingDecision(
-                    updatedBooking.getUserId(),
-                    updatedBooking.getBookingId(),
-                    normalizedNewStatus
-            );
-        }
+        notifyUserOfStatusChange(updatedBooking, normalizedNewStatus, reviewReason);
         return mapToResponseDTO(updatedBooking);
+    }
+
+    private void notifyUserOfStatusChange(Booking booking, String newStatus, String reviewReason) {
+        long bid = booking.getBookingId();
+        try {
+            if (APPROVED.equals(newStatus)) {
+                notificationService.create(
+                        booking.getUserId(),
+                        NotificationService.TYPE_BOOKING_APPROVED,
+                        "Booking approved",
+                        "Your booking #" + bid + " was approved."
+                                + (reviewReason != null && !reviewReason.isBlank() ? " Note: " + reviewReason : ""),
+                        bid
+                );
+            } else if (REJECTED.equals(newStatus)) {
+                notificationService.create(
+                        booking.getUserId(),
+                        NotificationService.TYPE_BOOKING_REJECTED,
+                        "Booking not approved",
+                        "Your booking #" + bid + " was not approved."
+                                + (reviewReason != null && !reviewReason.isBlank() ? " Reason: " + reviewReason : ""),
+                        bid
+                );
+            } else if (CANCELLED.equals(newStatus)) {
+                notificationService.create(
+                        booking.getUserId(),
+                        NotificationService.TYPE_BOOKING_CANCELLED,
+                        "Booking cancelled",
+                        "Your booking #" + bid + " was cancelled."
+                                + (reviewReason != null && !reviewReason.isBlank() ? " " + reviewReason : ""),
+                        bid
+                );
+            }
+        } catch (Exception e) {
+            log.warn("Could not create status notification: {}", e.getMessage());
+        }
     }
 
     @Override

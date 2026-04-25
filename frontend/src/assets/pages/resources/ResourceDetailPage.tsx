@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "qrcode";
+import { useAuth } from "../../../auth/AuthContext";
+import { isAdmin } from "../../../auth/roleMap";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import { resourceApi } from "../../api/resourceApi";
@@ -9,6 +11,8 @@ import type { ResourceHealth } from "../../types/resourceHealth";
 
 const ResourceDetailPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canManage = isAdmin(user?.roles);
   const { id } = useParams();
   const [resource, setResource] = useState<Resource | null>(null);
   const [health, setHealth] = useState<ResourceHealth | null>(null);
@@ -183,7 +187,7 @@ const ResourceDetailPage = () => {
           </div>
         ) : null}
 
-        {!loading && resource ? (
+        {!loading && resource && canManage ? (
           <button className="secondary-btn danger-btn" onClick={() => void handleDelete()}>
             Delete Resource
           </button>

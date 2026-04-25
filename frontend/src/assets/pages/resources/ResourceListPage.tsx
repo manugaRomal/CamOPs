@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../auth/AuthContext";
+import { isAdmin } from "../../../auth/roleMap";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import StatusBadge from "../../components/dashboard/StatusBadge";
 import { resourceApi } from "../../api/resourceApi";
@@ -9,6 +11,8 @@ const QUICK_STATUSES: ResourceStatus[] = ["ACTIVE", "INACTIVE", "MAINTENANCE", "
 
 const ResourceListPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canManage = isAdmin(user?.roles);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -160,20 +164,24 @@ const ResourceListPage = () => {
                       <button className="link-btn" onClick={() => navigate(`/resources/${resource.resourceId}`)}>
                         View
                       </button>
-                      <button className="link-btn" onClick={() => navigate(`/resources/${resource.resourceId}/edit`)}>
-                        Edit
-                      </button>
-                      <button
-                        className="link-btn"
-                        onClick={() =>
-                          void handleStatusChange(
-                            resource.resourceId,
-                            resource.status === "ACTIVE" ? "OUT_OF_SERVICE" : "ACTIVE",
-                          )
-                        }
-                      >
-                        {resource.status === "ACTIVE" ? "Mark Out" : "Activate"}
-                      </button>
+                      {canManage ? (
+                        <>
+                          <button className="link-btn" onClick={() => navigate(`/resources/${resource.resourceId}/edit`)}>
+                            Edit
+                          </button>
+                          <button
+                            className="link-btn"
+                            onClick={() =>
+                              void handleStatusChange(
+                                resource.resourceId,
+                                resource.status === "ACTIVE" ? "OUT_OF_SERVICE" : "ACTIVE",
+                              )
+                            }
+                          >
+                            {resource.status === "ACTIVE" ? "Mark Out" : "Activate"}
+                          </button>
+                        </>
+                      ) : null}
                     </td>
                   </tr>
                 ))}

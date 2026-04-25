@@ -1,7 +1,11 @@
-const TOKEN_KEY = "camops_jwt";
+const TOKEN_KEY = "camops_access_token";
 
 export function getStoredToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
 }
 
 export function setStoredToken(token: string): void {

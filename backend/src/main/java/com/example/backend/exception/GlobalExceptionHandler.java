@@ -1,5 +1,6 @@
 package com.example.backend.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -18,6 +19,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    /**
+     * Foreign key / unique constraint (e.g. invalid resource_id on booking) — avoid opaque 500.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Request could not be saved (invalid reference or conflict). " + ex.getMostSpecificCause().getMessage()
+        );
     }
 
     @ExceptionHandler(BadRequestException.class)

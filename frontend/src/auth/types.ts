@@ -1,13 +1,19 @@
 export type CurrentUser = {
-  userId: number;
-  email: string;
+  id: number;
   fullName: string;
+  email: string;
   phone: string;
   department: string;
-  profileImageUrl: string;
+  profileImageUrl?: string | null;
   roles: string[];
 };
 
 export type OauthLoginInfo = {
   googleAuthorizationUrl: string;
+};
+
+export type TokenResponse = {
+  accessToken: string;
+  tokenType: string;
+  expiresInMs: number;
 };

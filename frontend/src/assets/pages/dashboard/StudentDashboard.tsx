@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import StatCard from "../../components/dashboard/StatCard";
 import StatusBadge from "../../components/dashboard/StatusBadge";
-import { bookingApi } from "../../api/bookingApi";
+import { bookingApi, isBookingConflictError } from "../../api/bookingApi";
 import { resourceApi } from "../../api/resourceApi";
-import type { Booking } from "../../types/booking";
+import type { Booking, BookingConflictSuggestion } from "../../types/booking";
 import type { Resource } from "../../types/resource";
 
 type BookingForm = {
@@ -23,10 +23,51 @@ const initialForm: BookingForm = {
   expectedAttendees: "",
 };
 
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/** Calendar date in local time (for bookingDate) — avoids UTC shift from toISOString(). */
+function toLocalYmd(d: Date): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+/** Local wall-clock time for API (matches backend LocalDateTime). */
+function toLocalDateTimeHms(d: Date): string {
+  return `${toLocalYmd(d)}T${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+
+/** value for <input type="datetime-local" /> from a Date in local time */
+function toDatetimeLocalValue(d: Date): string {
+  return `${toLocalYmd(d)}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
+/**
+ * Parse backend LocalDateTime string as local wall clock (e.g. 2026-04-25T14:00:00)
+ * so it matches the same instant users see in datetime-local.
+ */
+function parseBackendLocalDateTime(iso: string): Date {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(iso.trim());
+  if (!m) return new Date(iso);
+  const y = Number(m[1]);
+  const month = Number(m[2]) - 1;
+  const day = Number(m[3]);
+  const h = Number(m[4]);
+  const mi = Number(m[5]);
+  const s = m[6] != null ? Number(m[6]) : 0;
+  return new Date(y, month, day, h, mi, s);
+}
+
 function formatDateTime(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString();
+}
+
+function formatBackendSuggestionLine(startIso: string, endIso: string): string {
+  const s = parseBackendLocalDateTime(startIso);
+  const e = parseBackendLocalDateTime(endIso);
+  const a = Number.isNaN(s.getTime()) ? startIso : s.toLocaleString();
+  const b = Number.isNaN(e.getTime()) ? endIso : e.toLocaleString();
+  return `${a} – ${b}`;
 }
 
 const StudentDashboard = () => {
@@ -39,6 +80,7 @@ const StudentDashboard = () => {
   const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
+  const [conflictSuggestion, setConflictSuggestion] = useState<BookingConflictSuggestion | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
@@ -92,7 +134,29 @@ const StudentDashboard = () => {
   }
 
   function handleFieldChange<K extends keyof BookingForm>(field: K, value: BookingForm[K]) {
+    setConflictSuggestion(null);
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function applySuggestedSlot(suggestion: BookingConflictSuggestion) {
+    const start = parseBackendLocalDateTime(suggestion.suggestedStartTime);
+    const end = parseBackendLocalDateTime(suggestion.suggestedEndTime);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return;
+    }
+    setForm((current) => ({
+      ...current,
+      startTime: toDatetimeLocalValue(start),
+      endTime: toDatetimeLocalValue(end),
+    }));
+    setConflictSuggestion(null);
+    setFormError("");
+  }
+
+  function applyAlternativeResource(resourceId: number) {
+    setForm((current) => ({ ...current, resourceId: String(resourceId) }));
+    setConflictSuggestion(null);
+    setFormError("");
   }
 
   async function handleCreateBooking(event: FormEvent<HTMLFormElement>) {
@@ -127,12 +191,13 @@ const StudentDashboard = () => {
     }
 
     setSubmitting(true);
+    setConflictSuggestion(null);
     try {
       const created = await bookingApi.create({
         resourceId,
-        bookingDate: startDate.toISOString().slice(0, 10),
-        startTime: startDate.toISOString().slice(0, 19),
-        endTime: endDate.toISOString().slice(0, 19),
+        bookingDate: toLocalYmd(startDate),
+        startTime: toLocalDateTimeHms(startDate),
+        endTime: toLocalDateTimeHms(endDate),
         purpose: form.purpose.trim(),
         expectedAttendees: attendees,
       });
@@ -140,7 +205,12 @@ const StudentDashboard = () => {
       setForm(initialForm);
       setSuccessMessage("Booking request submitted successfully.");
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to create booking");
+      if (isBookingConflictError(err)) {
+        setConflictSuggestion(err.suggestion);
+        setFormError(err.message);
+      } else {
+        setFormError(err instanceof Error ? err.message : "Failed to create booking");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -269,6 +339,62 @@ const StudentDashboard = () => {
               </button>
             </div>
           </form>
+
+          {conflictSuggestion &&
+          (conflictSuggestion.suggestedStartTime ||
+            conflictSuggestion.suggestedEndTime ||
+            (conflictSuggestion.alternativeResources?.length ?? 0) > 0) ? (
+            <div className="booking-smart-suggestion" role="region" aria-label="Smart scheduling suggestions">
+              <h4 className="booking-smart-suggestion-title">This slot is not available</h4>
+              <p className="booking-smart-suggestion-lead">Try one of the options below, then submit again.</p>
+              {conflictSuggestion.suggestedStartTime && conflictSuggestion.suggestedEndTime ? (
+                <div className="booking-smart-suggestion-block">
+                  <p className="booking-smart-suggestion-label">Next available with the same duration</p>
+                  <p className="booking-smart-suggestion-time">
+                    {formatBackendSuggestionLine(
+                      conflictSuggestion.suggestedStartTime,
+                      conflictSuggestion.suggestedEndTime
+                    )}
+                  </p>
+                  <button
+                    className="secondary-btn booking-smart-suggestion-btn"
+                    type="button"
+                    onClick={() => applySuggestedSlot(conflictSuggestion)}
+                  >
+                    Use suggested time
+                  </button>
+                </div>
+              ) : null}
+              {conflictSuggestion.alternativeResources && conflictSuggestion.alternativeResources.length > 0 ? (
+                <div className="booking-smart-suggestion-block">
+                  <p className="booking-smart-suggestion-label">Same time, other resources that fit your group</p>
+                  <ul className="booking-smart-alt-list">
+                    {conflictSuggestion.alternativeResources.map((alt) => (
+                      <li key={alt.resourceId}>
+                        <div className="booking-smart-alt-line">
+                          <span className="booking-smart-alt-name">
+                            {alt.resourceName}{" "}
+                            <span className="booking-smart-alt-meta">
+                              ({alt.resourceCode}
+                              {alt.location ? ` · ${alt.location}` : ""}
+                              {alt.capacity != null ? ` · cap. ${alt.capacity}` : ""})
+                            </span>
+                          </span>
+                          <button
+                            className="secondary-btn"
+                            type="button"
+                            onClick={() => applyAlternativeResource(alt.resourceId)}
+                          >
+                            Use this resource
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           {formError ? <p className="error-text">{formError}</p> : null}
           {successMessage ? <p className="success-text">{successMessage}</p> : null}

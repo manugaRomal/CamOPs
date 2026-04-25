@@ -1,38 +1,28 @@
 package com.example.backend.config;
 
-import com.example.backend.domain.RoleEntity;
-import com.example.backend.repository.RoleEntityRepository;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
+import com.example.backend.domain.Role;
+import com.example.backend.repository.RoleRepository;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@Component
-public class RoleDataInitializer implements ApplicationListener<ContextRefreshedEvent> {
+@Configuration
+public class RoleDataInitializer {
 
-    /** Product model: only three assignable names (see {@link com.example.backend.security.AppRoles}). */
-    private static final List<String> ROLES = List.of("ADMIN", "TECHNICIAN", "STUDENT");
+    private static final List<String> DEFAULT_ROLES = List.of("ADMIN", "STAFF", "STUDENT", "FACULTY");
 
-    private final RoleEntityRepository roleEntityRepository;
-    private boolean done;
-
-    public RoleDataInitializer(RoleEntityRepository roleEntityRepository) {
-        this.roleEntityRepository = roleEntityRepository;
-    }
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (done) {
-            return;
-        }
-        for (String name : ROLES) {
-            if (roleEntityRepository.findByRoleName(name).isEmpty()) {
-                RoleEntity r = new RoleEntity();
-                r.setRoleName(name);
-                roleEntityRepository.save(r);
+    @Bean
+    CommandLineRunner seedRolesIfEmpty(RoleRepository roleRepository) {
+        return args -> {
+            for (String name : DEFAULT_ROLES) {
+                if (roleRepository.findByRoleName(name).isEmpty()) {
+                    Role r = new Role();
+                    r.setRoleName(name);
+                    roleRepository.save(r);
+                }
             }
-        }
-        done = true;
+        };
     }
 }

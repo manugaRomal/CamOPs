@@ -39,7 +39,7 @@ const NotificationsPage = () => {
     try {
       await notificationsApi.markRead(id);
       setItems((current) =>
-        current.map((n) => (n.notificationId === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n)),
+        current.map((n) => (n.id === id ? { ...n, read: true, readAt: new Date().toISOString() } : n)),
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not mark as read");
@@ -52,7 +52,7 @@ const NotificationsPage = () => {
     setActionLoading(true);
     try {
       await notificationsApi.markAllRead();
-      setItems((current) => current.map((n) => ({ ...n, isRead: true, readAt: n.readAt ?? new Date().toISOString() })));
+      setItems((current) => current.map((n) => ({ ...n, read: true, readAt: n.readAt ?? new Date().toISOString() })));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not mark all as read");
     } finally {
@@ -60,7 +60,7 @@ const NotificationsPage = () => {
     }
   }
 
-  const unread = items.filter((n) => !n.isRead).length;
+  const unread = items.filter((n) => !n.read).length;
 
   return (
     <DashboardLayout>
@@ -93,10 +93,7 @@ const NotificationsPage = () => {
           {!loading && items.length > 0 ? (
             <ul className="notification-list">
               {items.map((n) => (
-                <li
-                  key={n.notificationId}
-                  className={`notification-item ${n.isRead ? "read" : "unread"}`}
-                >
+                <li key={n.id} className={`notification-item ${n.read ? "read" : "unread"}`}>
                   <div className="notification-body">
                     <div className="notification-title-row">
                       <strong>{n.title}</strong>
@@ -108,14 +105,14 @@ const NotificationsPage = () => {
                     ) : null}
                   </div>
                   <div className="notification-actions">
-                    {n.isRead ? (
+                    {n.read ? (
                       <span className="notification-read-pill">Read</span>
                     ) : (
                       <button
                         type="button"
                         className="secondary-btn"
                         disabled={actionLoading}
-                        onClick={() => void handleMarkRead(n.notificationId)}
+                        onClick={() => void handleMarkRead(n.id)}
                       >
                         Mark read
                       </button>

@@ -1,40 +1,29 @@
 import { clearStoredToken, getStoredToken } from "../../auth/tokenStorage";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+type UnauthorizedHandler = (() => void) | null;
 
-export function apiBaseUrlFor(path: string): string {
-  if (path.startsWith("http")) {
-    return path;
-  }
-  const prefix = API_BASE.replace(/\/$/, "");
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return `${prefix}${p}`;
-}
+let onUnauthorized: UnauthorizedHandler = null;
 
-type ApiFetchOptions = RequestInit & { auth?: boolean };
-
-let onUnauthorized: (() => void) | null = null;
-
-export function setApiUnauthorizedHandler(handler: (() => void) | null): void {
+export function setApiUnauthorizedHandler(handler: UnauthorizedHandler) {
   onUnauthorized = handler;
 }
 
-/**
- * Fetches a URL (relative to VITE_API_BASE_URL when set, or same origin for the Vite proxy).
- */
-export async function apiFetch(path: string, init: ApiFetchOptions = {}): Promise<Response> {
-  const { auth = true, ...rest } = init;
+export async function apiFetch(
+  path: string,
+  init: RequestInit & { auth?: boolean } = {},
+): Promise<Response> {
+  const { auth: useAuth = true, ...rest } = init;
   const headers = new Headers(rest.headers);
-  if (auth) {
+  if (useAuth) {
     const t = getStoredToken();
     if (t) {
       headers.set("Authorization", `Bearer ${t}`);
     }
   }
-  const response = await fetch(apiBaseUrlFor(path), { ...rest, headers });
-  if (response.status === 401) {
+  const res = await fetch(path, { ...rest, headers });
+  if (res.status === 401 && useAuth && getStoredToken()) {
     clearStoredToken();
     onUnauthorized?.();
   }
-  return response;
+  return res;
 }

@@ -1,9 +1,9 @@
 package com.example.backend.security;
 
 import com.example.backend.config.AppProperties;
-import com.example.backend.domain.UserEntity;
-import com.example.backend.repository.UserEntityRepository;
-import com.example.backend.service.UserAccountService;
+import com.example.backend.domain.User;
+import com.example.backend.repository.UserRepository;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
@@ -15,20 +15,23 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * On successful Google login, send the user back to the SPA with a JWT in the query string.
+ */
 @Component
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final UserEntityRepository userEntityRepository;
-    private final UserAccountService userAccountService;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
     private final AppProperties appProperties;
 
     public OAuth2LoginSuccessHandler(
-            UserEntityRepository userEntityRepository,
-            UserAccountService userAccountService,
+            JwtService jwtService,
+            UserRepository userRepository,
             AppProperties appProperties
     ) {
-        this.userEntityRepository = userEntityRepository;
-        this.userAccountService = userAccountService;
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
         this.appProperties = appProperties;
     }
 
@@ -37,16 +40,46 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication
-    ) throws IOException {
-        OAuth2User oauth = (OAuth2User) authentication.getPrincipal();
-        String sub = oauth.getAttribute("sub");
-        UserEntity user = userEntityRepository.findByGoogleSub(sub)
-                .or(() -> userEntityRepository.findByEmail(oauth.getAttribute("email")))
-                .orElseThrow(() -> new IllegalStateException("User should exist after OAuth2UserService"));
-        String jwt = userAccountService.issueJwtForUser(user);
-        String target = appProperties.getFrontendUrl().replaceAll("/$", "")
-                + "/auth/callback?token="
-                + URLEncoder.encode(jwt, StandardCharsets.UTF_8);
-        getRedirectStrategy().sendRedirect(request, response, target);
+    ) throws IOException, ServletException {
+        if (!(authentication.getPrincipal() instanceof OAuth2User oauth2User)) {
+            super.onAuthenticationSuccess(request, response, authentication);
+            return;
+        }
+        String email = oauth2User.getAttribute("email");
+        if (email == null || email.isBlank()) {
+            getRedirectStrategy().sendRedirect(
+                    request,
+                    response,
+                    buildFrontend("/login?oauthError=missing_email")
+            );
+            return;
+        }
+        User user = userRepository.findByEmailIgnoreCase(email.trim().toLowerCase())
+                .orElse(null);
+        if (user == null) {
+            getRedirectStrategy().sendRedirect(
+                    request,
+                    response,
+                    buildFrontend("/login?oauthError=user_not_persisted")
+            );
+            return;
+        }
+        String jwt = jwtService.createToken(user);
+        String tokenParam = URLEncoder.encode(jwt, StandardCharsets.UTF_8);
+        getRedirectStrategy().sendRedirect(
+                request,
+                response,
+                buildFrontend("/login?token=" + tokenParam)
+        );
+    }
+
+    private String buildFrontend(String path) {
+        String base = appProperties.getFrontendUrl() == null
+                ? "http://localhost:5173"
+                : appProperties.getFrontendUrl().replaceAll("/$", "");
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        return base + path;
     }
 }

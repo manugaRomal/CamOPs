@@ -1,19 +1,26 @@
 package com.example.backend.domain;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
-import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Users")
-public class UserEntity {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long userId;
+    private Long id;
 
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
@@ -33,23 +40,21 @@ public class UserEntity {
     @Column(name = "google_sub", unique = true, length = 255)
     private String googleSub;
 
-    @Column(name = "is_active")
-    private Boolean isActive = true;
+    @Column(name = "password_hash", length = 255)
+    private String passwordHash;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<UserRoleLink> roleLinks = new HashSet<>();
 
-    public Long getUserId() {
-        return userId;
+    public Long getId() {
+        return id;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFullName() {
@@ -100,19 +105,34 @@ public class UserEntity {
         this.googleSub = googleSub;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public boolean isActive() {
+        return active;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public Set<UserRoleLink> getRoleLinks() {
+        return roleLinks;
+    }
+
+    public void setRoleLinks(Set<UserRoleLink> roleLinks) {
+        this.roleLinks = roleLinks;
+    }
+
+    public void addRole(Role role) {
+        UserRoleLink link = new UserRoleLink();
+        link.setUser(this);
+        link.setRole(role);
+        this.roleLinks.add(link);
     }
 }

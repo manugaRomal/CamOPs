@@ -1,12 +1,12 @@
+/** Matches {@link com.example.backend.dto.NotificationResponseDTO} JSON. */
 export type AppNotification = {
-  notificationId: number;
-  userId: number;
+  id: number;
   type: string;
   title: string;
   message: string;
-  isRead: boolean | null;
+  read: boolean;
   readAt: string | null;
-  relatedTicketId: number | null;
   relatedBookingId: number | null;
+  relatedTicketId: number | null;
   createdAt: string | null;
 };

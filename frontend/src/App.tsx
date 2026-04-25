@@ -1,12 +1,13 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AdminOnlyRoute } from "./auth/AdminOnlyRoute";
 import { AuthProvider } from "./auth/AuthContext";
-import { AdminOnlyRoute, ProtectedRoute } from "./auth/ProtectedRoute";
+import { ProtectedRoute } from "./auth/ProtectedRoute";
+import LoginPage from "./assets/pages/LoginPage";
 import DashboardRouter from "./assets/pages/dashboard/DashboardRouter";
 import BookingListPage from "./assets/pages/bookings/BookingListPage";
 import ResourceDetailPage from "./assets/pages/resources/ResourceDetailPage";
 import ResourceFormPage from "./assets/pages/resources/ResourceFormPage";
 import ResourceListPage from "./assets/pages/resources/ResourceListPage";
-import LoginPage from "./assets/pages/auth/LoginPage";
 import AuthCallbackPage from "./assets/pages/auth/AuthCallbackPage";
 import NotificationsPage from "./assets/pages/notifications/NotificationsPage";
 import ProfilePage from "./assets/pages/profile/ProfilePage";
@@ -31,9 +32,15 @@ function App() {
             path="/bookings"
             element={
               <ProtectedRoute>
-                <AdminOnlyRoute>
-                  <BookingListPage />
-                </AdminOnlyRoute>
+                <BookingListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             }
           />
@@ -74,14 +81,6 @@ function App() {
             }
           />
           <Route
-            path="/notifications"
-            element={
-              <ProtectedRoute>
-                <NotificationsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/profile"
             element={
               <ProtectedRoute>
@@ -97,5 +96,3 @@ function App() {
 }
 
 export default App;
-
-//myapptsx

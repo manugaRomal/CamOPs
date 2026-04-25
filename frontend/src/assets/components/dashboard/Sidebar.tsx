@@ -2,16 +2,28 @@
 
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../auth/AuthContext";
-import { shellRoleLabel, type ShellRole } from "../../../auth/roleMap";
-import { useUnreadNotificationCount } from "../../../hooks/useUnreadNotificationCount";
 
-const Sidebar = () => {
+type SidebarProps = {
+  role: string;
+  userLabel: string;
+  unreadCount: number;
+};
+
+const initialsFrom = (name: string) => {
+  const p = name.trim().split(/\s+/).filter(Boolean);
+  if (p.length === 0) {
+    return "?";
+  }
+  if (p.length === 1) {
+    return p[0]!.slice(0, 2).toUpperCase();
+  }
+  return (p[0]!.charAt(0) + p[1]!.charAt(0)).toUpperCase();
+};
+
+const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { shellRole, user, logout } = useAuth();
-  const unreadCount = useUnreadNotificationCount();
-
-  const role: ShellRole = shellRole;
+  const { logout } = useAuth();
 
   const menuByRole: Record<string, { label: string; path?: string }[]> = {
     ADMIN: [
@@ -23,6 +35,12 @@ const Sidebar = () => {
       { label: "Users" },
       { label: "Notifications", path: "/notifications" },
       { label: "Analytics" },
+    ],
+    USER: [
+      { label: "Dashboard", path: "/" },
+      { label: "My Bookings" },
+      { label: "My Tickets" },
+      { label: "Notifications", path: "/notifications" },
     ],
     STUDENT: [
       { label: "Dashboard", path: "/" },
@@ -59,18 +77,13 @@ const Sidebar = () => {
     Dashboard: "/",
     Resources: "/resources",
     Bookings: "/bookings",
+    Notifications: "/notifications",
   };
 
   const menuItems = menuByRole[role] ?? menuByRole.STUDENT;
 
-  const displayName = user?.fullName?.trim() || user?.email || "User";
-  const avatar =
-    displayName
-      .split(/\s+/)
-      .map((p) => p[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "U";
+  const displayName = userLabel || "Signed in";
+  const avatar = initialsFrom(userLabel);
 
   return (
     <aside className="sidebar">
@@ -115,17 +128,15 @@ const Sidebar = () => {
       </ul>
 
       <div className="sidebar-profile-card">
-        <div className="sidebar-profile-top">
-          <div className="sidebar-avatar" title={user?.email}>
-            {avatar}
-          </div>
+        <div className="sidebar-profile-row">
+          <div className="sidebar-avatar">{avatar}</div>
           <div>
             <p className="sidebar-profile-name">{displayName}</p>
-            <p className="sidebar-profile-role">{shellRoleLabel(role)}</p>
+            <p className="sidebar-profile-role">{role === "ADMIN" ? "Administrator" : role}</p>
           </div>
         </div>
-        <button type="button" className="sidebar-logout-btn" onClick={() => logout()}>
-          Sign out
+        <button type="button" className="sidebar-logout" onClick={() => void logout()}>
+          Log out
         </button>
       </div>
     </aside>

@@ -2,7 +2,7 @@ import type { Resource, ResourceFilter, ResourcePayload, ResourceStatus } from "
 import type { ResourceHealth } from "../types/resourceHealth";
 import { apiFetch } from "./apiFetch";
 
-const API_BASE = "/api/resources";
+const API_BASE_URL = "/api/resources";
 
 async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -27,17 +27,17 @@ function buildQueryParams(filters?: ResourceFilter): string {
 
 export const resourceApi = {
   async list(filters?: ResourceFilter): Promise<Resource[]> {
-    const response = await apiFetch(`${API_BASE}${buildQueryParams(filters)}`);
+    const response = await apiFetch(`${API_BASE_URL}${buildQueryParams(filters)}`);
     return parseResponse<Resource[]>(response);
   },
 
   async getById(id: number): Promise<Resource> {
-    const response = await apiFetch(`${API_BASE}/${id}`);
+    const response = await apiFetch(`${API_BASE_URL}/${id}`);
     return parseResponse<Resource>(response);
   },
 
   async getHealth(id: number): Promise<ResourceHealth> {
-    const response = await apiFetch(`${API_BASE}/${id}/health`);
+    const response = await apiFetch(`${API_BASE_URL}/${id}/health`);
     const data = await parseResponse<{
       score: number;
       label: string;
@@ -59,7 +59,7 @@ export const resourceApi = {
   },
 
   async create(payload: ResourcePayload): Promise<Resource> {
-    const response = await apiFetch(API_BASE, {
+    const response = await apiFetch(API_BASE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -68,7 +68,7 @@ export const resourceApi = {
   },
 
   async update(id: number, payload: ResourcePayload): Promise<Resource> {
-    const response = await apiFetch(`${API_BASE}/${id}`, {
+    const response = await apiFetch(`${API_BASE_URL}/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -77,7 +77,7 @@ export const resourceApi = {
   },
 
   async remove(id: number): Promise<void> {
-    const response = await apiFetch(`${API_BASE}/${id}`, { method: "DELETE" });
+    const response = await apiFetch(`${API_BASE_URL}/${id}`, { method: "DELETE" });
     if (!response.ok) {
       const errorBody: { message?: string } = await response.json().catch(() => ({}));
       throw new Error(errorBody.message ?? "Failed to delete resource");
@@ -85,7 +85,7 @@ export const resourceApi = {
   },
 
   async updateStatus(id: number, status: ResourceStatus): Promise<Resource> {
-    const response = await apiFetch(`${API_BASE}/${id}/status`, {
+    const response = await apiFetch(`${API_BASE_URL}/${id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),

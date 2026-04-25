@@ -1,17 +1,18 @@
 package com.example.backend.security;
 
 import com.example.backend.config.AppProperties;
+import com.example.backend.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
-@Service
+@Component
 public class JwtService {
 
     private final AppProperties appProperties;
@@ -19,63 +20,60 @@ public class JwtService {
 
     public JwtService(AppProperties appProperties) {
         this.appProperties = appProperties;
-        byte[] bytes = this.appProperties.getJwtSecret().getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        this.key = Keys.hmacShaKeyFor(padTo256Bit(bytes));
+        String secret = appProperties.getJwt().getSecret();
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("app.jwt.secret must be at least 32 bytes for HS-256");
+        }
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static byte[] padTo256Bit(byte[] secret) {
-        if (secret.length >= 32) {
-            if (secret.length > 32) {
-                byte[] s = new byte[32];
-                System.arraycopy(secret, 0, s, 0, 32);
-                return s;
-            }
-            return secret;
-        }
-        byte[] padded = new byte[32];
-        System.arraycopy(secret, 0, padded, 0, secret.length);
-        for (int i = secret.length; i < 32; i++) {
-            padded[i] = (byte) (i * 3 + 7);
-        }
-        return padded;
-    }
-
-    public String generateToken(Long userId, String email, String fullName, String profileImageUrl, List<String> roleNames) {
+    public String createToken(User user) {
+        long expMs = appProperties.getJwt().getExpirationMs();
+        List<String> roles = user.getRoleLinks().stream()
+                .map(ur -> ur.getRole().getRoleName())
+                .toList();
         Date now = new Date();
-        Date exp = new Date(now.getTime() + appProperties.getJwtExpirationMs());
         return Jwts.builder()
-                .subject(String.valueOf(userId))
-                .claim("email", email)
-                .claim("name", fullName)
-                .claim("picture", profileImageUrl)
-                .claim("roles", String.join(",", roleNames))
+                .subject(String.valueOf(user.getId()))
+                .claim("email", user.getEmail())
+                .claim("roles", roles)
                 .issuedAt(now)
-                .expiration(exp)
+                .expiration(new Date(now.getTime() + expMs))
                 .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 
-    public boolean validate(String token) {
+    public boolean validateToken(String token) {
         try {
-            parseAllClaims(token);
+            parseClaims(token);
             return true;
-        } catch (Exception ex) {
+        } catch (Exception e) {
             return false;
         }
     }
 
-    public CamUserPrincipal toPrincipal(String token) {
-        Claims c = parseAllClaims(token);
-        long userId = Long.parseLong(c.getSubject());
-        String email = c.get("email", String.class);
-        String name = c.get("name", String.class);
-        String picture = c.get("picture", String.class);
-        String rolesCsv = c.get("roles", String.class);
-        List<String> roles = rolesCsv == null || rolesCsv.isBlank() ? List.of() : List.of(rolesCsv.split(","));
-        return new CamUserPrincipal(userId, email, name, picture, roles);
+    public Long parseUserId(String token) {
+        try {
+            return Long.parseLong(parseClaims(token).getSubject());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    private Claims parseAllClaims(String token) {
+    @SuppressWarnings("unchecked")
+    public List<String> parseRoles(String token) {
+        Claims c = parseClaims(token);
+        Object r = c.get("roles");
+        if (r instanceof List<?> list) {
+            return list.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .toList();
+        }
+        return List.of();
+    }
+
+    public Claims parseClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key)
                 .build()

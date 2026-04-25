@@ -11,16 +11,13 @@ import { useNavigate } from "react-router-dom";
 import { apiFetch, setApiUnauthorizedHandler } from "../assets/api/apiFetch";
 import { clearStoredToken, getStoredToken, setStoredToken } from "./tokenStorage";
 import type { CurrentUser, OauthLoginInfo } from "./types";
-import { mapHomeDashboard, mapShellRole, type HomeDashboard, type ShellRole } from "./roleMap";
 
 type AuthContextValue = {
   user: CurrentUser | null;
   isAuthReady: boolean;
   isAuthenticated: boolean;
-  homeDashboard: HomeDashboard;
-  shellRole: ShellRole;
   setToken: (token: string) => void;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<boolean>;
   logout: () => void;
   startGoogleLogin: () => Promise<void>;
 };
@@ -35,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = useCallback(async () => {
     if (!getStoredToken()) {
       setUser(null);
-      return;
+      return false;
     }
     const res = await apiFetch("/api/auth/me", { method: "GET", auth: true });
     if (res.ok) {
@@ -45,8 +42,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         phone: data.phone ?? "",
         department: data.department ?? "",
       });
+      return true;
     } else {
       setUser(null);
+      return false;
     }
   }, []);
 
@@ -85,12 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [refreshUser]);
 
-  const setToken = useCallback(
-    (token: string) => {
-      setStoredToken(token);
-    },
-    [],
-  );
+  const setToken = useCallback((token: string) => {
+    setStoredToken(token);
+  }, []);
 
   const startGoogleLogin = useCallback(async () => {
     const res = await apiFetch("/api/auth/login", { method: "GET", auth: false });
@@ -104,23 +100,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = data.googleAuthorizationUrl;
   }, []);
 
-  const homeDashboard = useMemo(() => mapHomeDashboard(user?.roles), [user]);
-
-  const shellRole = useMemo(() => mapShellRole(user), [user]);
-
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       isAuthReady,
       isAuthenticated: user !== null,
-      homeDashboard,
-      shellRole,
       setToken,
       refreshUser,
       logout,
       startGoogleLogin,
     }),
-    [user, isAuthReady, homeDashboard, shellRole, setToken, refreshUser, logout, startGoogleLogin],
+    [user, isAuthReady, setToken, refreshUser, logout, startGoogleLogin],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

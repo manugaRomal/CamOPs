@@ -1,5 +1,20 @@
 export type BookingStatus = "PENDING" | "APPROVED" | "CANCELLED" | "REJECTED" | string;
 
+/** Returned on 409 from POST /api/bookings when the slot conflicts (see backend BookingConflictSuggestionDTO). */
+export type AlternativeResourceSuggestion = {
+  resourceId: number;
+  resourceCode: string;
+  resourceName: string;
+  capacity?: number | null;
+  location?: string | null;
+};
+
+export type BookingConflictSuggestion = {
+  suggestedStartTime: string;
+  suggestedEndTime: string;
+  alternativeResources?: AlternativeResourceSuggestion[] | null;
+};
+
 export type Booking = {
   bookingId: number;
   userId: number;
