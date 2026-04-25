@@ -5,7 +5,19 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
+
+    List<Ticket> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    List<Ticket> findByAssignedToUserIdOrderByCreatedAtDesc(Long assignedToUserId);
+
+    @Query("select t from Ticket t order by t.createdAt desc")
+    List<Ticket> findAllOrderByCreatedAtDesc();
+
+    @Query("select t from Ticket t where t.userId = :uid or t.assignedToUserId = :uid order by t.createdAt desc")
+    List<Ticket> findForTechnicianUser(@Param("uid") Long userId);
 
     @Query(
             "select count(t) from Ticket t where t.resourceId = :resourceId "

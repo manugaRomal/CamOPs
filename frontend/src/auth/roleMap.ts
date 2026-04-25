@@ -31,6 +31,14 @@ export function isAdmin(roles: string[] | undefined): boolean {
   return roles?.includes("ADMIN") ?? false;
 }
 
+/** Technicians and staff see assigned work (matches backend ROLE_TECHNICIAN and similar). */
+export function isTechnician(roles: string[] | undefined): boolean {
+  if (!roles?.length) {
+    return false;
+  }
+  return roles.includes("TECHNICIAN") || roles.includes("STAFF");
+}
+
 export function shellRoleLabel(role: string): string {
   switch (role) {
     case "ADMIN":

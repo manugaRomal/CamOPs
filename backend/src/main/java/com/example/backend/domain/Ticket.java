@@ -22,6 +22,13 @@ public class Ticket {
     @Column(name = "resource_id")
     private Long resourceId;
 
+    @Column(name = "title", nullable = false, length = 200)
+    private String title;
+
+    /** Assigned technician (set by admin). */
+    @Column(name = "assigned_to")
+    private Long assignedToUserId;
+
     @Column(name = "category", nullable = false)
     private String category;
 
@@ -85,6 +92,22 @@ public class Ticket {
 
     public void setResourceId(Long resourceId) {
         this.resourceId = resourceId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Long getAssignedToUserId() {
+        return assignedToUserId;
+    }
+
+    public void setAssignedToUserId(Long assignedToUserId) {
+        this.assignedToUserId = assignedToUserId;
     }
 
     public String getCategory() {

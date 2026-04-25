@@ -13,6 +13,8 @@ import AuthCallbackPage from "./assets/pages/auth/AuthCallbackPage";
 import NotificationsPage from "./assets/pages/notifications/NotificationsPage";
 import AdminNotificationsPage from "./assets/pages/admin/AdminNotificationsPage";
 import ProfilePage from "./assets/pages/profile/ProfilePage";
+import TicketsPage from "./assets/pages/tickets/TicketsPage";
+import TicketDetailPage from "./assets/pages/tickets/TicketDetailPage";
 import "./assets/styles/dashboard.css";
 
 function App() {
@@ -105,6 +107,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tickets"
+            element={
+              <ProtectedRoute>
+                <TicketsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tickets/:id"
+            element={
+              <ProtectedRoute>
+                <TicketDetailPage />
               </ProtectedRoute>
             }
           />

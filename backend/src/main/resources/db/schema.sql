@@ -81,10 +81,12 @@ CREATE TABLE Ticket (
     ticket_code VARCHAR(50) NOT NULL UNIQUE,
     user_id BIGINT NOT NULL,
     resource_id BIGINT,
+    title VARCHAR(200) NOT NULL,
     category VARCHAR(80) NOT NULL,
     priority VARCHAR(20) DEFAULT 'MEDIUM',
     status VARCHAR(30) DEFAULT 'OPEN',
     description TEXT NOT NULL,
+    assigned_to BIGINT,
     preferred_contact VARCHAR(50),
     resolution_notes TEXT,
     rejection_reason VARCHAR(500),
@@ -93,7 +95,8 @@ CREATE TABLE Ticket (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (resource_id) REFERENCES Resources(resource_id)
+    FOREIGN KEY (resource_id) REFERENCES Resources(resource_id),
+    FOREIGN KEY (assigned_to) REFERENCES Users(user_id)
 );
 
 /* ============================================================

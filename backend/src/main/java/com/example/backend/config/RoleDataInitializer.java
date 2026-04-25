@@ -11,7 +11,13 @@ import java.util.List;
 @Configuration
 public class RoleDataInitializer {
 
-    private static final List<String> DEFAULT_ROLES = List.of("ADMIN", "STAFF", "STUDENT", "FACULTY");
+    /**
+     * Must include {@code TECHNICIAN} so admin can grant it; ticket assign uses TECHNICIAN and STAFF.
+     * {@code AppRoles} documents ADMIN, TECHNICIAN, STUDENT; STAFF/FACULTY are extra org roles.
+     */
+    private static final List<String> DEFAULT_ROLES = List.of(
+            "ADMIN", "TECHNICIAN", "STAFF", "STUDENT", "FACULTY"
+    );
 
     @Bean
     CommandLineRunner seedRolesIfEmpty(RoleRepository roleRepository) {

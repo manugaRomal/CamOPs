@@ -1419,3 +1419,14 @@ th {
   flex-direction: column;
   gap: 4px;
 }
+
+.technician-actions-hint {
+  margin: -0.25rem 0 1rem;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.technician-actions-hint a {
+  color: #2563eb;
+  font-weight: 600;
+}

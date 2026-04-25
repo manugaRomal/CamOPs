@@ -32,7 +32,7 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
       { label: "Resources", path: "/resources" },
       { label: "Bookings", path: "/bookings" },
       { label: "Calendar", path: "/bookings/calendar" },
-      { label: "Tickets" },
+      { label: "Tickets", path: "/tickets" },
       { label: "Users" },
       { label: "Notifications", path: "/notifications" },
       { label: "Announcements", path: "/admin/notifications" },
@@ -41,7 +41,7 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
     USER: [
       { label: "Dashboard", path: "/" },
       { label: "My Bookings" },
-      { label: "My Tickets" },
+      { label: "My Tickets", path: "/tickets" },
       { label: "Notifications", path: "/notifications" },
     ],
     STUDENT: [
@@ -49,6 +49,7 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
       { label: "Profile", path: "/profile" },
       { label: "Resources", path: "/resources" },
       { label: "Calendar", path: "/bookings/calendar" },
+      { label: "Tickets", path: "/tickets" },
       { label: "My Bookings", path: "/" },
       { label: "Notifications", path: "/notifications" },
     ],
@@ -56,7 +57,7 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
       { label: "Dashboard", path: "/" },
       { label: "Profile", path: "/profile" },
       { label: "Calendar", path: "/bookings/calendar" },
-      { label: "Assigned Tickets" },
+      { label: "Tickets", path: "/tickets" },
       { label: "Work Updates" },
       { label: "Notifications", path: "/notifications" },
     ],
@@ -75,7 +76,6 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
     Calendar: "◶",
     "My Bookings": "◷",
     "My Tickets": "☰",
-    "Assigned Tickets": "☰",
     "Work Updates": "△",
   };
 
@@ -86,6 +86,8 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
     Calendar: "/bookings/calendar",
     Notifications: "/notifications",
     Announcements: "/admin/notifications",
+    Tickets: "/tickets",
+    "My Tickets": "/tickets",
   };
 
   const menuItems = menuByRole[role] ?? menuByRole.STUDENT;
@@ -115,7 +117,8 @@ const Sidebar = ({ role, userLabel, unreadCount }: SidebarProps) => {
                   : location.pathname === resolvedPath ||
                     (resolvedPath === "/resources" && location.pathname.startsWith("/resources")) ||
                     (resolvedPath === "/profile" && location.pathname.startsWith("/profile")) ||
-                    (resolvedPath === "/notifications" && location.pathname.startsWith("/notifications")))
+                    (resolvedPath === "/notifications" && location.pathname.startsWith("/notifications")) ||
+                    (resolvedPath === "/tickets" && location.pathname.startsWith("/tickets")))
             : false;
 
           return (
