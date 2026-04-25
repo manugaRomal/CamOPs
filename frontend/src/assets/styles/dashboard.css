@@ -1108,3 +1108,196 @@ th {
     flex: 1;
   }
 }
+
+/* —— Auth (login) —— */
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #e8f0ff 0%, #f4f7fb 100%);
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 28px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+}
+
+.auth-brand {
+  font-weight: 800;
+  color: #1d4ed8;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.auth-card h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.auth-sub {
+  margin: 0 0 20px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.auth-google-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.auth-hint {
+  margin: 20px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.auth-hint a {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.auth-gate {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+}
+
+/* —— Top bar: notifications + logout —— */
+.notification-bell {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-bell .notification-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.topbar-logout {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  color: #334155;
+}
+
+.topbar-logout:hover {
+  border-color: #94a3b8;
+}
+
+/* —— Sidebar profile —— */
+.sidebar-profile-card {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.sidebar-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-logout-btn {
+  width: 100%;
+  margin-top: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(0, 0, 0, 0.18);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sidebar-logout-btn:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* —— Notification inbox —— */
+.notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.notification-item.unread {
+  border-color: #93c5fd;
+  background: #f0f7ff;
+}
+
+.notification-title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.notification-message {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notification-meta {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.notification-read-pill {
+  font-size: 12px;
+  font-weight: 700;
+  color: #16a34a;
+  background: #ecfdf3;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.profile-readonly {
+  font-size: 15px;
+  color: #475569;
+  margin-bottom: 20px;
+}
+
+.profile-readonly strong {
+  color: #0f172a;
+  margin-right: 8px;
+}
+
+.profile-form {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

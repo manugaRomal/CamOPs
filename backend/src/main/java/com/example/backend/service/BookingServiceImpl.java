@@ -11,7 +11,6 @@ import com.example.backend.exception.ResourceConflictException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.BookingRepository;
 import com.example.backend.repository.ResourceRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +21,6 @@ import java.util.Locale;
 import java.util.Set;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class BookingServiceImpl implements BookingService {
 
@@ -34,6 +32,17 @@ public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final ResourceRepository resourceRepository;
+    private final NotificationService notificationService;
+
+    public BookingServiceImpl(
+            BookingRepository bookingRepository,
+            ResourceRepository resourceRepository,
+            NotificationService notificationService
+    ) {
+        this.bookingRepository = bookingRepository;
+        this.resourceRepository = resourceRepository;
+        this.notificationService = notificationService;
+    }
 
     @Override
     public BookingResponseDTO createBooking(BookingRequestDTO bookingRequestDTO) {
@@ -102,6 +111,13 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Booking updatedBooking = bookingRepository.save(booking);
+        if (APPROVED.equals(normalizedNewStatus) || REJECTED.equals(normalizedNewStatus)) {
+            notificationService.notifyBookingDecision(
+                    updatedBooking.getUserId(),
+                    updatedBooking.getBookingId(),
+                    normalizedNewStatus
+            );
+        }
         return mapToResponseDTO(updatedBooking);
     }
 

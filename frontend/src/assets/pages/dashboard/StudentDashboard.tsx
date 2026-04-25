@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import StatCard from "../../components/dashboard/StatCard";
 import StatusBadge from "../../components/dashboard/StatusBadge";
@@ -6,8 +6,6 @@ import { bookingApi } from "../../api/bookingApi";
 import { resourceApi } from "../../api/resourceApi";
 import type { Booking } from "../../types/booking";
 import type { Resource } from "../../types/resource";
-
-const DEFAULT_STUDENT_ID = 1001;
 
 type BookingForm = {
   resourceId: string;
@@ -32,7 +30,6 @@ function formatDateTime(value: string): string {
 }
 
 const StudentDashboard = () => {
-  const [studentId, setStudentId] = useState<number>(DEFAULT_STUDENT_ID);
   const [resources, setResources] = useState<Resource[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [form, setForm] = useState<BookingForm>(initialForm);
@@ -51,7 +48,7 @@ const StudentDashboard = () => {
       setLoading(true);
       setError("");
       try {
-        const [resourceData, bookingData] = await Promise.all([resourceApi.list(), bookingApi.list(studentId)]);
+        const [resourceData, bookingData] = await Promise.all([resourceApi.list(), bookingApi.list()]);
         if (!mounted) return;
         setResources(resourceData);
         setBookings(bookingData);
@@ -70,7 +67,7 @@ const StudentDashboard = () => {
     return () => {
       mounted = false;
     };
-  }, [studentId]);
+  }, []);
 
   const sortedBookings = useMemo(() => {
     return [...bookings].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
@@ -98,7 +95,7 @@ const StudentDashboard = () => {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  async function handleCreateBooking(event: React.FormEvent<HTMLFormElement>) {
+  async function handleCreateBooking(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
     setSuccessMessage("");
@@ -132,7 +129,6 @@ const StudentDashboard = () => {
     setSubmitting(true);
     try {
       const created = await bookingApi.create({
-        userId: studentId,
         resourceId,
         bookingDate: startDate.toISOString().slice(0, 10),
         startTime: startDate.toISOString().slice(0, 19),
@@ -155,7 +151,7 @@ const StudentDashboard = () => {
     setError("");
     setCancellingBookingId(bookingId);
     try {
-      const updated = await bookingApi.cancel(bookingId, studentId, cancelReasonByBookingId[bookingId]);
+      const updated = await bookingApi.cancel(bookingId, cancelReasonByBookingId[bookingId]);
       setBookings((current) => current.map((item) => (item.bookingId === bookingId ? updated : item)));
       setCancelReasonByBookingId((current) => ({ ...current, [bookingId]: "" }));
       setSuccessMessage(`Booking #${bookingId} cancelled.`);
@@ -167,29 +163,13 @@ const StudentDashboard = () => {
   }
 
   return (
-    <DashboardLayout role="STUDENT">
+    <DashboardLayout>
       <div className="dashboard-grid admin-dashboard-page">
         <section className="hero-panel">
           <div>
             <p className="hero-eyebrow">Student workspace</p>
             <h1>Manage your bookings</h1>
             <p className="hero-description">Create booking requests and cancel pending or approved ones when plans change.</p>
-          </div>
-        </section>
-
-        <section className="panel modern-panel student-id-panel">
-          <div className="form-group">
-            <label className="field-label" htmlFor="student-id-input">
-              Student ID (Temporary until login is added)
-            </label>
-            <input
-              id="student-id-input"
-              className="input-control modern-input"
-              type="number"
-              min={1}
-              value={studentId}
-              onChange={(event) => setStudentId(Number(event.target.value) || DEFAULT_STUDENT_ID)}
-            />
           </div>
         </section>
 

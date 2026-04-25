@@ -1,11 +1,12 @@
 import type { Resource, ResourceFilter, ResourcePayload, ResourceStatus } from "../types/resource";
 import type { ResourceHealth } from "../types/resourceHealth";
+import { apiFetch } from "./apiFetch";
 
-const API_BASE_URL = "http://localhost:8080/api/resources";
+const API_BASE = "/api/resources";
 
 async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({}));
+    const errorBody: { message?: string } = await response.json().catch(() => ({}));
     throw new Error(errorBody.message ?? "Request failed");
   }
   return (await response.json()) as T;
@@ -15,30 +16,28 @@ function buildQueryParams(filters?: ResourceFilter): string {
   if (!filters) {
     return "";
   }
-
   const params = new URLSearchParams();
   if (filters.resourceType) params.set("resourceType", filters.resourceType);
   if (filters.location) params.set("location", filters.location);
   if (typeof filters.capacity === "number") params.set("capacity", String(filters.capacity));
   if (filters.status) params.set("status", filters.status);
-
   const queryString = params.toString();
   return queryString ? `?${queryString}` : "";
 }
 
 export const resourceApi = {
   async list(filters?: ResourceFilter): Promise<Resource[]> {
-    const response = await fetch(`${API_BASE_URL}${buildQueryParams(filters)}`);
+    const response = await apiFetch(`${API_BASE}${buildQueryParams(filters)}`);
     return parseResponse<Resource[]>(response);
   },
 
   async getById(id: number): Promise<Resource> {
-    const response = await fetch(`${API_BASE_URL}/${id}`);
+    const response = await apiFetch(`${API_BASE}/${id}`);
     return parseResponse<Resource>(response);
   },
 
   async getHealth(id: number): Promise<ResourceHealth> {
-    const response = await fetch(`${API_BASE_URL}/${id}/health`);
+    const response = await apiFetch(`${API_BASE}/${id}/health`);
     const data = await parseResponse<{
       score: number;
       label: string;
@@ -60,7 +59,7 @@ export const resourceApi = {
   },
 
   async create(payload: ResourcePayload): Promise<Resource> {
-    const response = await fetch(API_BASE_URL, {
+    const response = await apiFetch(API_BASE, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -69,7 +68,7 @@ export const resourceApi = {
   },
 
   async update(id: number, payload: ResourcePayload): Promise<Resource> {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
+    const response = await apiFetch(`${API_BASE}/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -78,15 +77,15 @@ export const resourceApi = {
   },
 
   async remove(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/${id}`, { method: "DELETE" });
+    const response = await apiFetch(`${API_BASE}/${id}`, { method: "DELETE" });
     if (!response.ok) {
-      const errorBody = await response.json().catch(() => ({}));
+      const errorBody: { message?: string } = await response.json().catch(() => ({}));
       throw new Error(errorBody.message ?? "Failed to delete resource");
     }
   },
 
   async updateStatus(id: number, status: ResourceStatus): Promise<Resource> {
-    const response = await fetch(`${API_BASE_URL}/${id}/status`, {
+    const response = await apiFetch(`${API_BASE}/${id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),

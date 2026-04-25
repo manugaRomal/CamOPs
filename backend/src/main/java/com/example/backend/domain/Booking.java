@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Bookings", schema = "dbo")
+@Table(name = "Bookings")
 public class Booking {
 
     @Id

@@ -7,6 +7,7 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.service.ResourceHealthService;
 import com.example.backend.service.ResourceService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,21 +47,25 @@ public class ResourceController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Resource createResource(@Valid @RequestBody Resource resource) {
         return resourceService.createResource(resource);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Resource updateResource(@PathVariable Long id, @Valid @RequestBody Resource resource) {
         return resourceService.updateResource(id, resource);
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public Resource updateResourceStatus(@PathVariable Long id, @Valid @RequestBody ResourceStatusUpdateRequest request) {
         return resourceService.updateResourceStatus(id, request.getStatus());
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteResource(@PathVariable Long id) {
         resourceService.deleteResource(id);
     }

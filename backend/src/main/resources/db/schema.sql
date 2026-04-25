@@ -194,9 +194,8 @@ CREATE INDEX IX_Notification_created_at ON Notification(created_at);
    ============================================================ */
 INSERT INTO Roles (role_name) VALUES
     ('ADMIN'),
-    ('STAFF'),
-    ('STUDENT'),
-    ('FACULTY');
+    ('TECHNICIAN'),
+    ('STUDENT');
 
 ALTER TABLE Resources
 MODIFY status ENUM('ACTIVE', 'INACTIVE', 'MAINTENANCE') DEFAULT 'ACTIVE';

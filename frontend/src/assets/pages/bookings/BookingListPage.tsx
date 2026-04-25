@@ -20,7 +20,6 @@ const BookingListPage = () => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState("");
-  const [reviewedBy, setReviewedBy] = useState("");
   const [reviewReason, setReviewReason] = useState("");
   const [actionLoading, setActionLoading] = useState<"APPROVE" | "REJECT" | null>(null);
 
@@ -77,7 +76,6 @@ const BookingListPage = () => {
     setSelectedBooking(null);
     setModalError("");
     setReviewReason("");
-    setReviewedBy("");
     setModalLoading(true);
     try {
       const booking = await bookingApi.getById(bookingId);
@@ -94,7 +92,6 @@ const BookingListPage = () => {
     setSelectedBooking(null);
     setModalError("");
     setReviewReason("");
-    setReviewedBy("");
     setActionLoading(null);
   }
 
@@ -109,12 +106,10 @@ const BookingListPage = () => {
     setModalError("");
     setActionLoading(action);
     try {
-      const parsedReviewedBy = reviewedBy.trim().length > 0 ? Number(reviewedBy.trim()) : undefined;
-      const reviewerId = Number.isFinite(parsedReviewedBy) ? parsedReviewedBy : undefined;
       const updatedBooking =
         action === "APPROVE"
-          ? await bookingApi.approve(selectedBookingId, reviewerId, reviewReason)
-          : await bookingApi.reject(selectedBookingId, reviewerId, reviewReason);
+          ? await bookingApi.approve(selectedBookingId, undefined, reviewReason)
+          : await bookingApi.reject(selectedBookingId, undefined, reviewReason);
 
       setBookings((current) =>
         current.map((booking) => (booking.bookingId === updatedBooking.bookingId ? updatedBooking : booking)),
@@ -131,7 +126,7 @@ const BookingListPage = () => {
   }
 
   return (
-    <DashboardLayout role="ADMIN">
+    <DashboardLayout>
       <div className="dashboard-grid admin-dashboard-page">
         <section className="hero-panel">
           <div>
@@ -252,18 +247,6 @@ const BookingListPage = () => {
                 </p>
 
                 <div className="booking-modal-inputs">
-                  <label>
-                    Reviewed By (Admin ID)
-                    <input
-                      className="input-control"
-                      type="number"
-                      min={1}
-                      value={reviewedBy}
-                      onChange={(event) => setReviewedBy(event.target.value)}
-                      placeholder="Optional"
-                    />
-                  </label>
-
                   <label>
                     Review Reason
                     <textarea

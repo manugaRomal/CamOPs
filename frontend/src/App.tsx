@@ -1,30 +1,101 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./auth/AuthContext";
+import { AdminOnlyRoute, ProtectedRoute } from "./auth/ProtectedRoute";
 import DashboardRouter from "./assets/pages/dashboard/DashboardRouter";
 import BookingListPage from "./assets/pages/bookings/BookingListPage";
 import ResourceDetailPage from "./assets/pages/resources/ResourceDetailPage";
 import ResourceFormPage from "./assets/pages/resources/ResourceFormPage";
 import ResourceListPage from "./assets/pages/resources/ResourceListPage";
+import LoginPage from "./assets/pages/auth/LoginPage";
+import AuthCallbackPage from "./assets/pages/auth/AuthCallbackPage";
+import NotificationsPage from "./assets/pages/notifications/NotificationsPage";
+import ProfilePage from "./assets/pages/profile/ProfilePage";
 import "./assets/styles/dashboard.css";
 
 function App() {
-  const role = "ADMIN"; // test role until login is implemented
-
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<DashboardRouter role={role} />} />
-
-        <Route path="/bookings" element={<BookingListPage />} />
-        <Route path="/resources" element={<ResourceListPage />} />
-        <Route path="/resources/new" element={<ResourceFormPage />} />
-        <Route path="/resources/:id" element={<ResourceDetailPage />} />
-        <Route path="/resources/:id/edit" element={<ResourceFormPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <DashboardRouter />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings"
+            element={
+              <ProtectedRoute>
+                <AdminOnlyRoute>
+                  <BookingListPage />
+                </AdminOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources"
+            element={
+              <ProtectedRoute>
+                <ResourceListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources/new"
+            element={
+              <ProtectedRoute>
+                <AdminOnlyRoute>
+                  <ResourceFormPage />
+                </AdminOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources/:id"
+            element={
+              <ProtectedRoute>
+                <ResourceDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources/:id/edit"
+            element={
+              <ProtectedRoute>
+                <AdminOnlyRoute>
+                  <ResourceFormPage />
+                </AdminOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
 
 export default App;
 
-//application
+//myapptsx

@@ -13,7 +13,7 @@ import {
 
 const TechnicianDashboard = () => {
   return (
-    <DashboardLayout role="TECHNICIAN">
+    <DashboardLayout>
       <div className="dashboard-grid">
         <div className="stats-grid">
           {technicianStats.map((stat) => (

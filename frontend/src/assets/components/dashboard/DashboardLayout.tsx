@@ -5,16 +5,15 @@ import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
 type DashboardLayoutProps = {
-  role: string;
   children: ReactNode;
 };
 
-const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="dashboard-shell">
-      <Sidebar role={role} />
+      <Sidebar />
       <div className="main-area">
-        <Topbar role={role} />
+        <Topbar />
         <div className="content-area">{children}</div>
       </div>
     </div>

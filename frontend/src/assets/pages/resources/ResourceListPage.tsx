@@ -63,7 +63,7 @@ const ResourceListPage = () => {
   };
 
   return (
-    <DashboardLayout role="ADMIN">
+    <DashboardLayout>
       <div className="dashboard-grid">
         <div className="panel">
           <div className="resources-header">

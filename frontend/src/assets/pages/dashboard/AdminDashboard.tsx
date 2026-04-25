@@ -27,7 +27,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <DashboardLayout role="ADMIN">
+    <DashboardLayout>
       <div className="dashboard-grid admin-dashboard-page">
         <section className="hero-panel">
           <div>

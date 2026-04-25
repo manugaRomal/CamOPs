@@ -83,7 +83,7 @@ const ResourceFormPage = () => {
   };
 
   return (
-    <DashboardLayout role="ADMIN">
+    <DashboardLayout>
       <div className="resource-form-shell">
         <div className="resource-page-head resource-page-head-modern">
           <div>
