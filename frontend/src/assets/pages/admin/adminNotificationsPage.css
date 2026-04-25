@@ -1,0 +1,264 @@
+.admin-notifications-page h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+}
+
+.admin-notif-broadcast h2 {
+  margin-bottom: 0.25rem;
+}
+
+.admin-notif-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 36rem;
+  margin-top: 0.75rem;
+}
+
+.admin-notif-broadcast .admin-notif-form {
+  max-width: 56rem;
+}
+
+.admin-notif-label-text {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.4rem;
+}
+
+.admin-notif-recipient-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-notif-radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+}
+
+.admin-notif-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.admin-notif-user-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+}
+
+.admin-notif-inline-error {
+  margin: 0 0 0.5rem;
+}
+
+.admin-notif-user-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-notif-user-toolbar > label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #4b5563;
+  min-width: 10rem;
+  flex: 1 1 12rem;
+}
+
+.admin-notif-search {
+  flex: 2 1 16rem;
+}
+
+.admin-notif-select {
+  min-height: 2.3rem;
+}
+
+.admin-notif-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.admin-notif-select-count {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.admin-notif-user-scroll {
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.admin-notif-user-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.admin-notif-user-table th,
+.admin-notif-user-table td {
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+
+.admin-notif-user-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f9fafb;
+  z-index: 1;
+  font-weight: 600;
+  color: #374151;
+}
+
+.admin-notif-check-col {
+  width: 2.5rem;
+}
+
+.admin-notif-roles-cell {
+  max-width: 9rem;
+  word-break: break-word;
+}
+
+.admin-notif-muted {
+  color: #6b7280;
+  padding: 0.5rem;
+}
+
+.admin-notif-form > label,
+.admin-notif-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.admin-notif-input,
+.admin-notif-textarea {
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-notif-textarea {
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.admin-notif-list-head {
+  margin-bottom: 0.75rem;
+}
+
+.admin-notif-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-notif-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-notif-table th,
+.admin-notif-table td {
+  text-align: left;
+  padding: 0.5rem 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.admin-notif-title-cell {
+  max-width: 14rem;
+  word-break: break-word;
+}
+
+.admin-notif-nowrap {
+  white-space: nowrap;
+}
+
+.admin-notif-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+.admin-notif-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.admin-notif-danger {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.admin-notif-pager {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.admin-notif-empty {
+  color: #6b7280;
+}
+
+.admin-notif-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+
+.admin-notif-dialog {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  max-width: 28rem;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-notif-dialog h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+.admin-notif-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}

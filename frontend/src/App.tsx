@@ -1,121 +1,136 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AdminOnlyRoute } from "./auth/AdminOnlyRoute";
+import { AuthProvider } from "./auth/AuthContext";
+import { ProtectedRoute } from "./auth/ProtectedRoute";
+import LoginPage from "./assets/pages/LoginPage";
+import DashboardRouter from "./assets/pages/dashboard/DashboardRouter";
+import BookingListPage from "./assets/pages/bookings/BookingListPage";
+import BookingCalendarPage from "./assets/pages/bookings/BookingCalendarPage";
+import ResourceDetailPage from "./assets/pages/resources/ResourceDetailPage";
+import ResourceFormPage from "./assets/pages/resources/ResourceFormPage";
+import ResourceListPage from "./assets/pages/resources/ResourceListPage";
+import AuthCallbackPage from "./assets/pages/auth/AuthCallbackPage";
+import NotificationsPage from "./assets/pages/notifications/NotificationsPage";
+import AdminNotificationsPage from "./assets/pages/admin/AdminNotificationsPage";
+import ProfilePage from "./assets/pages/profile/ProfilePage";
+import TicketsPage from "./assets/pages/tickets/TicketsPage";
+import TicketDetailPage from "./assets/pages/tickets/TicketDetailPage";
+import "./assets/styles/dashboard.css";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <DashboardRouter />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings"
+            element={
+              <ProtectedRoute>
+                <BookingListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings/calendar"
+            element={
+              <ProtectedRoute>
+                <BookingCalendarPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/notifications"
+            element={
+              <ProtectedRoute>
+                <AdminOnlyRoute>
+                  <AdminNotificationsPage />
+                </AdminOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources"
+            element={
+              <ProtectedRoute>
+                <ResourceListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources/new"
+            element={
+              <ProtectedRoute>
+                <AdminOnlyRoute>
+                  <ResourceFormPage />
+                </AdminOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources/:id"
+            element={
+              <ProtectedRoute>
+                <ResourceDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources/:id/edit"
+            element={
+              <ProtectedRoute>
+                <AdminOnlyRoute>
+                  <ResourceFormPage />
+                </AdminOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tickets"
+            element={
+              <ProtectedRoute>
+                <TicketsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tickets/:id"
+            element={
+              <ProtectedRoute>
+                <TicketDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

@@ -1,0 +1,152 @@
+.sla-timer {
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.sla-timer-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.sla-timer-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.sla-timer-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+}
+
+.sla-timer-target {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.sla-timer-readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
+  font-size: 0.88rem;
+  font-family: ui-monospace, Menlo, monospace;
+  color: #334155;
+  margin-bottom: 0.55rem;
+}
+
+.sla-timer-breach {
+  font-weight: 800;
+  color: #b91c1c;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+}
+
+.sla-timer-remaining {
+  color: #64748b;
+}
+
+.sla-timer-track {
+  height: 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.sla-timer-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.35s ease-out, background 0.25s ease;
+}
+
+.sla-timer-track--ok .sla-timer-fill {
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+}
+
+.sla-timer-track--warning .sla-timer-fill {
+  background: linear-gradient(90deg, #ea580c, #f97316);
+}
+
+.sla-timer-track--breach .sla-timer-fill {
+  background: linear-gradient(90deg, #b91c1c, #ef4444);
+}
+
+.sla-timer-legend {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.sla-timer-resolved-text {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #15803d;
+}
+
+.sla-timer-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.sla-timer[data-sla="done"] {
+  background: linear-gradient(180deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-color: #bbf7d0;
+}
+
+.sla-timer--compact {
+  margin: 0;
+  padding: 0.35rem 0.4rem;
+  min-width: 9.5rem;
+  max-width: 14rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.sla-timer--compact .sla-timer-header {
+  margin-bottom: 0.25rem;
+}
+
+.sla-timer--compact .sla-timer-title {
+  font-size: 0.72rem;
+}
+
+.sla-timer--compact .sla-timer-target {
+  font-size: 0.68rem;
+  margin-left: 0;
+}
+
+.sla-timer--compact .sla-timer-readout {
+  font-size: 0.68rem;
+  margin-bottom: 0.25rem;
+}
+
+.sla-timer--compact .sla-timer-track {
+  height: 6px;
+}
+
+.sla-timer--compact .sla-timer-resolved-text {
+  font-size: 0.75rem;
+}
+
+.sla-timer--compact .sla-timer-meta {
+  display: none;
+}
+
+.tickets-sla-cell {
+  vertical-align: top;
+  min-width: 10rem;
+}
